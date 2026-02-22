@@ -725,6 +725,7 @@ function bindEvents() {
 }
 
 // ─── Actions ──────────────────────────────────────────────────────────────────
+window.useHistoryIdx = i => { const h=store.getHistory()[i]; if(h){state.home.query=h;state.home.showHistory=false;doSearch();} };
 window.switchTab = t => { state.tab=t; render(); window.scrollTo(0,0); };
 window.toggleEmotion = k => { state.home.emotion=state.home.emotion===k?'':k; render(); };
 window.openDaily = () => { state.home.showDaily=true; render(); loadDaily(); };
@@ -783,7 +784,7 @@ async function doSearch() {
     const prompt = h.emotion&&h.query.trim()?`Find Quranic Ayat for someone feeling ${h.emotion} and asking: "${h.query}"`
       :h.emotion?`Find comforting Quranic Ayat for someone feeling ${h.emotion}`
       :`Find Quranic Ayat about: "${h.query}"`;
-    const raw = await claude('You are Noor. Return ONLY a raw JSON array, no markdown. Exactly 2 ayat with keys: surah_name, surah_arabic, surah_number (int), ayat_number (int), arabic, urdu, english, tafseer (2 sentences max), relevance (1 sentence). Concise.', prompt);
+    const raw = await claude(`You are Noor. Return ONLY a raw JSON array, no markdown. Exactly 2 ayat with keys: surah_name, surah_arabic, surah_number, ayat_number, arabic, urdu, english, tafseer, relevance. Concise.`, prompt);
     const t=raw.replace(/```json|```/g,'').trim();
     const s=t.indexOf('['),e=t.lastIndexOf(']');
     h.results=JSON.parse(s!==-1&&e>s?t.slice(s,e+1):t);
@@ -796,7 +797,7 @@ async function doHadith() {
   if (!h.query.trim()) return;
   h.loading=true; h.error=''; h.results=null; render();
   try {
-    const raw = await claude('Return ONLY a raw JSON array, no markdown. Exactly 2 hadith with keys: narrator, book, book_arabic, hadith_number, arabic, english, urdu, explanation (2 sentences max), grade. Concise.', `Find Hadith about: "${h.query}"`);
+    const raw = await claude(`Return ONLY a raw JSON array, no markdown. Exactly 2 hadith with keys: narrator, book, book_arabic, hadith_number, arabic, english, urdu, explanation, grade. Concise.`, `Find Hadith about: "${h.query}"`);
     const t=raw.replace(/```json|```/g,'').trim();
     const s=t.indexOf('['),e=t.lastIndexOf(']');
     h.results=JSON.parse(s!==-1&&e>s?t.slice(s,e+1):t);
@@ -827,7 +828,7 @@ async function loadDaily() {
   if(cached&&cached.date===today){h.daily=cached.ayat;h.dailyLoading=false;render();return;}
   h.dailyLoading=true; render();
   try {
-    const raw=await claude('Return ONLY a raw JSON object (no markdown) with keys: surah_name, surah_arabic, surah_number (int), ayat_number (int), arabic, urdu, english, tafseer (2 sentences max). Pick an uplifting ayat.','Give me today's daily Quran ayat.');
+    const raw=await claude(`Return ONLY a raw JSON object, no markdown, with keys: surah_name, surah_arabic, surah_number, ayat_number, arabic, urdu, english, tafseer. Pick an uplifting ayat.`,"Give me today's daily Quran ayat.");
     const t=raw.replace(/```json|```/g,'').trim();
     const s=t.indexOf('{'),e=t.lastIndexOf('}');
     const ayat=JSON.parse(s!==-1&&e>s?t.slice(s,e+1):t);
