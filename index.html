@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a1f1f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Noor">
+<meta name="description" content="AI-Powered Quranic Guidance">
+<title>Noor — نور</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --gold:#c9a84c;--gold2:#a8722a;--gold-soft:rgba(201,168,76,0.15);
+  --bg:#071818;--bg2:#0a2020;--bg3:#0d2828;
+  --text:rgba(253,246,227,0.9);--text2:rgba(253,246,227,0.55);--text3:rgba(253,246,227,0.25);
+  --border:rgba(201,168,76,0.2);--border2:rgba(201,168,76,0.1);
+  --card:rgba(255,255,255,0.04);--radius:16px;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overscroll-behavior:none}
+#root{min-height:100vh;min-height:-webkit-fill-available}
+::-webkit-scrollbar{width:0}
+button{-webkit-appearance:none;cursor:pointer}
+input,textarea{-webkit-appearance:none;font-family:'Inter',sans-serif;outline:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{transform:scale(1);box-shadow:0 4px 20px rgba(201,168,76,0.4)}50%{transform:scale(1.07);box-shadow:0 8px 30px rgba(201,168,76,0.7)}}
+@keyframes shimmer{0%{opacity:0.4}50%{opacity:1}100%{opacity:0.4}}
+@keyframes slideIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+.fade{animation:fadeUp 0.4s ease both}
+.spin{animation:spin 1s linear infinite}
+
+/* ── Onboarding ── */
+#onboarding{
+  position:fixed;inset:0;background:linear-gradient(160deg,#060f0f,#0a2020,#061515);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:32px 24px;z-index:1000;
+}
+.ob-slide{text-align:center;max-width:360px;animation:slideIn 0.4s ease both}
+.ob-icon{font-size:5rem;margin-bottom:16px;filter:drop-shadow(0 0 28px rgba(201,168,76,0.8))}
+.ob-title{font-family:'Amiri',serif;font-size:2rem;color:var(--gold);margin-bottom:6px}
+.ob-arabic{font-family:'Amiri',serif;font-size:1.3rem;color:rgba(201,168,76,0.4);margin-bottom:20px}
+.ob-desc{font-size:0.95rem;color:var(--text2);line-height:1.8;margin-bottom:36px}
+.ob-dots{display:flex;justify-content:center;gap:8px;margin-bottom:32px}
+.ob-dot{height:8px;border-radius:4px;background:rgba(201,168,76,0.25);transition:all 0.3s}
+.ob-dot.active{background:var(--gold);width:28px!important}
+.ob-dot:not(.active){width:8px}
+.ob-btn{width:100%;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:14px;padding:15px;color:#1a1208;font-weight:700;font-size:1rem;letter-spacing:0.3px}
+.ob-back{background:none;border:none;color:rgba(201,168,76,0.35);font-size:0.85rem;margin-top:12px;padding:8px}
+.ob-skip{background:none;border:none;color:var(--text3);font-size:0.75rem;margin-top:6px;padding:6px}
+
+/* ── App Layout ── */
+#app{display:none;flex-direction:column;min-height:100vh}
+#app.show{display:flex}
+.header{
+  text-align:center;
+  padding:max(20px,env(safe-area-inset-top)) 16px 14px;
+  background:rgba(7,24,24,0.85);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border2);
+  position:sticky;top:0;z-index:100;
+}
+.header-inner{display:flex;align-items:center;justify-content:center;gap:10px;position:relative}
+.header-logo{display:flex;align-items:center;gap:10px}
+.header-moon{font-size:1.6rem;filter:drop-shadow(0 0 12px rgba(201,168,76,0.7))}
+.header-name{font-family:'Amiri',serif;font-size:1.9rem;color:var(--gold);letter-spacing:3px;font-style:italic}
+.header-arabic{font-family:'Amiri',serif;font-size:1.3rem;color:rgba(201,168,76,0.4)}
+.header-sub{font-size:0.58rem;color:var(--text3);letter-spacing:3px;text-transform:uppercase;margin-top:3px}
+.key-btn{position:absolute;right:0;background:var(--gold-soft);border:1px solid var(--border);border-radius:8px;padding:5px 10px;color:rgba(201,168,76,0.5);font-size:0.68rem}
+
+.content{flex:1;overflow-y:auto;padding:16px 14px 80px;max-width:760px;margin:0 auto;width:100%}
+
+/* ── Bottom Nav ── */
+.nav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:rgba(5,18,18,0.97);border-top:1px solid var(--border2);
+  backdrop-filter:blur(16px);
+  display:flex;justify-content:space-around;
+  padding:8px 0 max(12px,env(safe-area-inset-bottom));
+  z-index:100;
+}
+.nav-btn{background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 8px;min-width:48px}
+.nav-icon{font-size:1.25rem;transition:filter 0.2s}
+.nav-btn.active .nav-icon{filter:drop-shadow(0 0 8px rgba(201,168,76,0.9))}
+.nav-label{font-size:0.58rem;color:var(--text3);transition:color 0.2s}
+.nav-btn.active .nav-label{color:var(--gold)}
+.nav-dot{width:4px;height:4px;border-radius:50%;background:transparent;transition:background 0.2s}
+.nav-btn.active .nav-dot{background:var(--gold)}
+
+/* ── Cards ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:14px}
+.card-header{background:linear-gradient(135deg,rgba(201,168,76,0.12),transparent);border-bottom:1px solid var(--border2);padding:11px 16px;margin:-18px -18px 16px;border-radius:var(--radius) var(--radius) 0 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.section-label{font-size:0.63rem;text-transform:uppercase;letter-spacing:2.5px;color:var(--gold);font-weight:700}
+
+/* ── Search ── */
+.emotion-grid{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;justify-content:center}
+.emotion-btn{background:var(--gold-soft);border:1.5px solid var(--border);color:var(--text2);padding:6px 13px;border-radius:50px;font-size:0.78rem;transition:all 0.2s}
+.emotion-btn.active{background:rgba(201,168,76,0.22);border-color:var(--gold);color:var(--gold)}
+textarea,input[type=text]{background:rgba(255,255,255,0.05);border:1.5px solid rgba(201,168,76,0.25);border-radius:12px;padding:11px 14px;color:var(--text);width:100%;font-size:0.93rem;transition:border-color 0.2s}
+textarea:focus,input[type=text]:focus{border-color:var(--gold)}
+.search-btn{width:100%;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:12px;padding:13px;color:#1a1208;font-weight:700;font-size:0.9rem;margin-top:10px;letter-spacing:0.3px}
+.search-btn:disabled{background:var(--gold-soft);color:rgba(201,168,76,0.4);cursor:not-allowed}
+
+/* ── Ayat Card ── */
+.ayat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px}
+.ayat-meta{background:linear-gradient(135deg,rgba(201,168,76,0.13),transparent);border-bottom:1px solid var(--border2);padding:11px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.ayat-ref{font-size:0.83rem;color:#e8c97a;font-weight:600}
+.ayat-actions{display:flex;gap:5px}
+.action-btn{background:var(--gold-soft);border:1px solid var(--border);border-radius:7px;padding:4px 10px;color:rgba(201,168,76,0.7);font-size:0.73rem}
+.action-btn.active{background:rgba(201,168,76,0.25);color:#e8c97a}
+.ayat-arabic{font-family:'Amiri',serif;font-size:1.8rem;line-height:2;text-align:right;direction:rtl;padding:18px 16px 12px;border-bottom:1px solid var(--border2);background:rgba(201,168,76,0.02)}
+.ayat-ref-small{font-size:0.65rem;direction:ltr;text-align:left;margin-top:6px;color:rgba(201,168,76,0.35);font-family:'Inter',sans-serif}
+.ayat-translations{padding:14px 16px;display:grid;gap:12px}
+.trans-row{display:flex;gap:10px;align-items:flex-start}
+.lang-badge{min-width:32px;height:32px;background:var(--gold-soft);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:800;color:var(--gold);flex-shrink:0}
+.trans-label{font-size:0.58rem;text-transform:uppercase;letter-spacing:2px;color:rgba(201,168,76,0.45);margin-bottom:3px;font-weight:700}
+.trans-urdu{font-family:'Amiri',serif;direction:rtl;text-align:right;font-size:1rem;line-height:2;color:var(--text2)}
+.trans-english{font-size:0.92rem;line-height:1.7;color:var(--text2)}
+.ayat-tafseer{background:rgba(10,28,28,0.5);border-top:1px solid var(--border2);padding:14px 16px}
+.tafseer-text{font-size:0.87rem;line-height:1.78;color:var(--text2)}
+.relevance-box{margin-top:10px;padding:9px 13px;background:var(--gold-soft);border-radius:8px;border-left:3px solid var(--gold);font-size:0.82rem;color:rgba(201,168,76,0.8);font-style:italic}
+
+/* ── Hadith Card ── */
+.hadith-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px}
+.grade-badge{background:rgba(50,180,80,0.13);border:1px solid rgba(50,180,80,0.28);border-radius:50px;padding:3px 10px;font-size:0.64rem;color:#6fdf8f;font-weight:700}
+.hadith-arabic{font-family:'Amiri',serif;font-size:1.5rem;line-height:1.9;text-align:right;direction:rtl;padding:16px;border-bottom:1px solid var(--border2)}
+.hadith-body{padding:14px 16px;display:grid;gap:11px}
+.hadith-explanation{background:rgba(10,28,28,0.5);border-top:1px solid var(--border2);padding:13px 16px}
+
+/* ── Topic pills ── */
+.topics{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px}
+.topic-pill{background:var(--gold-soft);border:1px solid var(--border);border-radius:50px;padding:5px 13px;color:rgba(201,168,76,0.7);font-size:0.72rem;cursor:pointer;transition:all 0.2s}
+.topic-pill:hover{background:rgba(201,168,76,0.2);color:var(--gold)}
+
+/* ── Names ── */
+.names-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:14px}
+.name-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:12px 10px;text-align:center;cursor:pointer;transition:border-color 0.2s}
+.name-card:hover{border-color:var(--gold)}
+.name-num{font-size:0.58rem;color:var(--text3);margin-bottom:3px}
+.name-arabic{font-family:'Amiri',serif;font-size:1.4rem;color:#e8c97a;margin-bottom:4px}
+.name-tr{font-size:0.67rem;color:var(--gold);font-weight:600}
+.name-en{font-size:0.61rem;color:var(--text3);margin-top:2px}
+.name-detail{background:rgba(201,168,76,0.07);border:1px solid var(--gold);border-radius:var(--radius);padding:22px;text-align:center;margin-bottom:14px}
+
+/* ── Prayer ── */
+.time-display{font-size:2rem;font-weight:700;color:#e8c97a;text-align:center;letter-spacing:2px}
+.date-display{font-size:0.77rem;color:var(--text3);text-align:center;margin-top:4px}
+.prayer-row{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:10px;margin-bottom:6px}
+.prayer-row.next{background:rgba(201,168,76,0.1);border:1px solid var(--border)}
+.prayer-row:not(.next){background:rgba(255,255,255,0.02);border:1px solid var(--border2)}
+.next-badge{background:var(--gold-soft);border:1px solid var(--border);border-radius:9px;padding:11px;text-align:center;margin-bottom:14px}
+
+/* ── Dhikr ── */
+.dhikr-list{display:grid;gap:7px;margin-bottom:16px}
+.dhikr-item{background:var(--card);border:1.5px solid var(--border2);border-radius:11px;padding:9px 13px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:all 0.2s}
+.dhikr-item.active{background:rgba(201,168,76,0.1);border-color:var(--gold)}
+.dhikr-counter{background:rgba(201,168,76,0.05);border:1px solid var(--border);border-radius:var(--radius);padding:22px;text-align:center}
+.dhikr-tap{width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#8a5e20);border:4px solid rgba(201,168,76,0.4);box-shadow:0 8px 28px rgba(201,168,76,0.35);font-size:2rem;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;transition:transform 0.1s}
+.dhikr-tap:active{transform:scale(0.92)}
+
+/* ── Bookmarks ── */
+.empty-state{text-align:center;padding:60px 20px;color:var(--text3)}
+.empty-icon{font-size:3.5rem;margin-bottom:14px}
+
+/* ── Loading ── */
+.loader{text-align:center;padding:44px 20px}
+.spinner{width:44px;height:44px;border:3px solid var(--border2);border-top:3px solid var(--gold);border-radius:50%;margin:0 auto 14px}
+.loader-text{color:var(--text3);font-size:0.85rem}
+.loader-arabic{font-family:'Amiri',serif;font-size:1.4rem;color:rgba(201,168,76,0.3);margin-top:8px;animation:shimmer 2s ease infinite}
+
+/* ── Error ── */
+.error-box{background:rgba(180,50,50,0.1);border:1px solid rgba(180,50,50,0.3);border-radius:12px;padding:14px 18px;color:rgba(255,180,180,0.8);font-size:0.88rem;text-align:center}
+
+/* ── Daily Float ── */
+.daily-float{position:fixed;bottom:82px;right:16px;z-index:200;display:flex;flex-direction:column;align-items:center;gap:3px}
+.daily-btn{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));border:2px solid rgba(201,168,76,0.5);box-shadow:0 4px 20px rgba(201,168,76,0.5);font-size:1.3rem;display:flex;align-items:center;justify-content:center;animation:pulse 2.5s ease-in-out infinite}
+.daily-label{font-size:0.5rem;color:rgba(201,168,76,0.55)}
+
+/* ── Modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(4,14,14,0.92);z-index:300;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(10px)}
+.modal-box{background:linear-gradient(160deg,#0d2424,#0a3030);border:1px solid rgba(201,168,76,0.3);border-radius:22px;padding:20px;max-width:580px;width:100%;max-height:85vh;overflow-y:auto}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.modal-close{background:var(--gold-soft);border:1px solid var(--border);border-radius:8px;padding:4px 12px;color:rgba(201,168,76,0.6);font-size:0.78rem}
+
+/* ── Ad Banner ── */
+.ad-banner{border:1px solid var(--border);border-radius:13px;padding:12px 14px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.ad-cta{background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:8px;padding:7px 14px;color:#1a1208;font-weight:700;font-size:0.78rem;white-space:nowrap}
+
+/* ── Search History ── */
+.history-dropdown{background:#0d2424;border:1px solid var(--border);border-radius:10px;margin-top:4px;overflow:hidden}
+.history-item{padding:9px 13px;font-size:0.85rem;color:var(--text2);cursor:pointer;border-top:1px solid var(--border2);display:flex;align-items:center;gap:8px}
+.history-item:first-child{border-top:none}
+</style>
+</head>
+<body>
+
+<!-- ── ONBOARDING ── -->
+<div id="onboarding">
+  <div class="ob-slide" id="ob-slide">
+    <div class="ob-icon" id="ob-icon">🌙</div>
+    <div class="ob-title" id="ob-title">Welcome to Noor</div>
+    <div class="ob-arabic" id="ob-arabic">مرحباً بك في نور</div>
+    <div class="ob-desc" id="ob-desc">Your personal AI-powered Islamic companion. Find guidance from the Quran and Sunnah, tailored to your heart and emotions.</div>
+    <div class="ob-dots" id="ob-dots"></div>
+    <button class="ob-btn" id="ob-next">Next →</button>
+    <div><button class="ob-back" id="ob-back" style="display:none">← Back</button></div>
+    <div><button class="ob-skip" id="ob-skip">Skip intro</button></div>
+  </div>
+</div>
+
+<!-- ── MAIN APP ── -->
+<div id="app">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-inner">
+      <div class="header-logo">
+        <span class="header-moon">🌙</span>
+        <span class="header-name">Noor</span>
+        <span class="header-arabic">نور</span>
+      </div>
+      <button class="key-btn" onclick="changeKey()">🔑 API</button>
+    </div>
+    <div class="header-sub">AI-Powered Quranic Guidance</div>
+  </div>
+
+  <!-- Content -->
+  <div class="content" id="content"></div>
+
+  <!-- Bottom Nav -->
+  <div class="nav" id="nav"></div>
+
+  <!-- Daily Float -->
+  <div class="daily-float">
+    <button class="daily-btn" onclick="openDaily()">🌅</button>
+    <span class="daily-label">Daily</span>
+  </div>
+
+  <!-- Daily Modal -->
+  <div class="modal-overlay" id="dailyModal" style="display:none" onclick="closeDaily()">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <span class="section-label">🌅 Today's Ayat</span>
+        <button class="modal-close" onclick="closeDaily()">✕ Close</button>
+      </div>
+      <div id="dailyContent"><div class="loader"><div class="spinner spin"></div><div class="loader-text">Loading...</div></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════
+// DATA
+// ════════════════════════════════════════════════════════
+
+const ONBOARD_SLIDES = [
+  {icon:'🌙',title:'Welcome to Noor',arabic:'مرحباً بك في نور',desc:'Your personal AI-powered Islamic companion. Find guidance from the Quran and Sunnah, tailored to your heart.'},
+  {icon:'🔍',title:'Search by Emotion',arabic:'البحث بالمشاعر',desc:'Feeling sad, anxious, or lost? Select your emotion and Noor finds the perfect Ayat to comfort your soul.'},
+  {icon:'📜',title:'Hadith & 99 Names',arabic:'الأسماء الحسنى',desc:'Search authentic Hadith by topic, explore all 99 Beautiful Names of Allah with benefits, and track your daily Dhikr.'},
+  {icon:'🕌',title:'Complete Islamic App',arabic:'تطبيق إسلامي متكامل',desc:'Prayer times for any city, Dhikr counter, bookmarks, and beautiful Daily Ayat — everything you need for your deen.'},
+];
+
+const EMOTIONS = [
+  {e:'😢',l:'Sad',k:'sad'},{e:'😰',l:'Anxious',k:'anxious'},
+  {e:'🤲',l:'Grateful',k:'grateful'},{e:'🌫️',l:'Lost',k:'lost'},
+  {e:'🌅',l:'Hopeful',k:'hopeful'},{e:'😟',l:'Afraid',k:'afraid'},
+  {e:'☮️',l:'Peaceful',k:'peaceful'},{e:'😠',l:'Angry',k:'angry'},
+  {e:'💔',l:'Heartbroken',k:'heartbroken'},{e:'🔍',l:'Seeking Guidance',k:'seeking guidance'},
+];
+
+const AYAT = {
+  sad:[
+    {sn:'Al-Baqarah',sa:'الْبَقَرَة',s:2,a:286,ar:'لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا',ur:'اللہ کسی جان کو اس کی طاقت سے زیادہ تکلیف نہیں دیتا',en:'Allah does not burden a soul beyond that it can bear.',tf:'This verse is a mercy from Allah, assuring us every hardship is within our capacity to endure.',rl:'When sadness overwhelms you, remember Allah never gives you more than you can handle.'},
+    {sn:'Ash-Sharh',sa:'الشَّرْح',s:94,a:6,ar:'إِنَّ مَعَ الْعُسْرِ يُسْرًا',ur:'بے شک تکلیف کے ساتھ آسانی ہے',en:'Indeed, with hardship will be ease.',tf:'Allah repeats this promise twice in Surah Ash-Sharh. The ease is not after hardship — it is WITH it, right now.',rl:'Your sadness carries within it the seed of relief. This is Allah\'s promise.'},
+    {sn:'Az-Zumar',sa:'الزُّمَر',s:39,a:53,ar:'لَا تَقْنَطُوا مِن رَّحْمَةِ اللَّهِ',ur:'اللہ کی رحمت سے مایوس مت ہو',en:'Do not despair of the mercy of Allah.',tf:'Allah directly addresses those in despair. No matter how great your sins or sorrows, His mercy is greater.',rl:'Your sadness does not separate you from Allah\'s mercy — it can bring you closer.'},
+    {sn:'Al-Imran',sa:'آل عِمْرَان',s:3,a:139,ar:'وَلَا تَهِنُوا وَلَا تَحْزَنُوا وَأَنتُمُ الْأَعْلَوْنَ',ur:'کمزوری مت دکھاؤ اور غم نہ کرو، تم ہی غالب ہو',en:'Do not weaken and do not grieve, for you will be superior if you are believers.',tf:'Grief is natural but should not lead to weakness. Your strength as a believer is permanent.',rl:'Your sadness is temporary — your strength as a believer is eternal.'},
+  ],
+  anxious:[
+    {sn:'Ar-Ra\'d',sa:'الرَّعْد',s:13,a:28,ar:'أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ',ur:'سن لو، اللہ کے ذکر سے ہی دلوں کو سکون ملتا ہے',en:'Verily, in the remembrance of Allah do hearts find rest.',tf:'The prescription for a restless heart is dhikr. No medicine can replace the peace that comes from remembering Allah.',rl:'The cure for your anxiety is already given: remember Allah.'},
+    {sn:'At-Talaq',sa:'الطَّلَاق',s:65,a:3,ar:'وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ',ur:'اور جو اللہ پر بھروسہ کرے تو وہ اس کے لیے کافی ہے',en:'And whoever relies upon Allah — then He is sufficient for him.',tf:'Tawakkul — complete trust in Allah — is the antidote to anxiety. When you hand your affairs to Allah, worry loses its power.',rl:'Place your anxiety in Allah\'s hands. He is sufficient for you.'},
+    {sn:'Al-Baqarah',sa:'الْبَقَرَة',s:2,a:286,ar:'لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا',ur:'اللہ کسی جان کو اس کی طاقت سے زیادہ تکلیف نہیں دیتا',en:'Allah does not burden a soul beyond that it can bear.',tf:'Whatever you fear, know that Allah already measured your capacity. You are strong enough for what lies ahead.',rl:'The thing you are anxious about is within your power to face — Allah guaranteed it.'},
+  ],
+  grateful:[
+    {sn:'Ibrahim',sa:'إِبْرَاهِيم',s:14,a:7,ar:'لَئِن شَكَرْتُمْ لَأَزِيدَنَّكُمْ',ur:'اگر تم شکر کرو گے تو میں تمہیں اور زیادہ دوں گا',en:'If you are grateful, I will surely increase you in favor.',tf:'Gratitude is a key that unlocks more blessings. Shukr is not just words but a state of the heart that acknowledges Allah\'s gifts.',rl:'Your gratitude today plants the seeds of tomorrow\'s blessings.'},
+    {sn:'Al-Baqarah',sa:'الْبَقَرَة',s:2,a:152,ar:'فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي',ur:'پس مجھے یاد کرو میں تمہیں یاد کروں گا اور میرا شکر ادا کرو',en:'Remember Me, and I will remember you. Be grateful to Me.',tf:'When you remember Allah with gratitude, He remembers you in His divine presence. This is the most beautiful exchange.',rl:'Your gratitude is a conversation with Allah — and He responds.'},
+  ],
+  lost:[
+    {sn:'Al-Fatihah',sa:'الْفَاتِحَة',s:1,a:6,ar:'اهدِنَا الصِّرَاطَ المُستَقِيمَ',ur:'ہمیں سیدھے راستے پر چلا',en:'Guide us to the straight path.',tf:'This is the master dua for guidance, taught by Allah Himself and repeated 17 times daily in prayer.',rl:'You recite this dua 17 times a day — Allah is already answering.'},
+    {sn:'Ad-Duha',sa:'الضُّحَى',s:93,a:7,ar:'وَوَجَدَكَ ضَالًّا فَهَدَىٰ',ur:'اور اس نے تمہیں بھٹکا ہوا پایا تو راہ دکھائی',en:'And He found you lost and guided you.',tf:'Allah guided the Prophet from confusion to clarity. Feeling lost is not failure — it is the starting point of divine guidance.',rl:'Feeling lost means you are at the exact point where Allah\'s guidance begins.'},
+    {sn:'Al-Baqarah',sa:'الْبَقَرَة',s:2,a:257,ar:'اللَّهُ وَلِيُّ الَّذِينَ آمَنُوا يُخْرِجُهُم مِّنَ الظُّلُمَاتِ إِلَى النُّورِ',ur:'اللہ ایمان والوں کا دوست ہے انہیں اندھیروں سے روشنی میں لاتا ہے',en:'Allah is the ally of those who believe. He brings them out from darknesses into the light.',tf:'Allah personally guides believers from darkness to light. You are not alone in feeling lost.',rl:'Allah is already leading you from darkness to light.'},
+  ],
+  hopeful:[
+    {sn:'Yusuf',sa:'يُوسُف',s:12,a:87,ar:'لَا تَيْأَسُوا مِن رَّوْحِ اللَّهِ',ur:'اللہ کی رحمت سے مایوس نہ ہو',en:'Do not despair of relief from Allah.',tf:'Prophet Yaqub said this after years of separation. His hope was ultimately rewarded — yours will be too.',rl:'Your hope is well-placed. Allah rewards those who never stop believing.'},
+    {sn:'Az-Zumar',sa:'الزُّمَر',s:39,a:10,ar:'إِنَّمَا يُوَفَّى الصَّابِرُونَ أَجْرَهُم بِغَيْرِ حِسَابٍ',ur:'صبر کرنے والوں کو ان کا اجر بے حساب دیا جائے گا',en:'Indeed, the patient will be given their reward without account.',tf:'The reward for patience and hope is so vast it cannot be measured. Allah rewards the hopeful without limit.',rl:'Your hope and patience are building a reward beyond calculation.'},
+  ],
+  afraid:[
+    {sn:'Al-Anfal',sa:'الْأَنفَال',s:8,a:40,ar:'وَاعْلَمُوا أَنَّ اللَّهَ مَوْلَاكُمْ نِعْمَ الْمَوْلَىٰ',ur:'اور جان لو کہ اللہ تمہارا مددگار ہے، وہ کیا اچھا مولا ہے',en:'Know that Allah is your protector — excellent is the protector and excellent is the helper.',tf:'Fear diminishes when we truly internalize that Allah is our protector. He is not just any guardian — He is the best.',rl:'You have the best protector in existence — what is there truly to fear?'},
+    {sn:'At-Tawbah',sa:'التَّوْبَة',s:9,a:51,ar:'لَّن يُصِيبَنَا إِلَّا مَا كَتَبَ اللَّهُ لَنَا',ur:'ہمیں وہی پہنچے گا جو اللہ نے ہمارے لیے لکھ دیا ہے',en:'Nothing will befall us except what Allah has decreed for us.',tf:'Everything is in Allah\'s hands. What you fear cannot reach you unless Allah wills it — and if He wills it, there is wisdom in it.',rl:'Your fear loses power when you remember nothing happens outside Allah\'s decree.'},
+  ],
+  peaceful:[
+    {sn:'Al-Fajr',sa:'الْفَجْر',s:89,a:27,ar:'يَا أَيَّتُهَا النَّفْسُ الْمُطْمَئِنَّةُ',ur:'اے اطمینان والی روح',en:'O tranquil soul.',tf:'This is Allah calling out to the peaceful soul — the highest state a believer can reach in this life.',rl:'The peace you feel is Allah\'s gift — nurture it through dhikr and gratitude.'},
+    {sn:'Al-Fath',sa:'الْفَتْح',s:48,a:4,ar:'هُوَ الَّذِي أَنزَلَ السَّكِينَةَ فِي قُلُوبِ الْمُؤْمِنِينَ',ur:'وہی ہے جس نے مومنوں کے دلوں میں سکون نازل فرمایا',en:'It is He who sent down tranquility into the hearts of the believers.',tf:'Sakinah — divine tranquility — is a gift directly sent by Allah into believing hearts. It comes through faith.',rl:'The peace in your heart right now is a direct gift from Allah.'},
+  ],
+  angry:[
+    {sn:'Al-Imran',sa:'آل عِمْرَان',s:3,a:134,ar:'وَالْكَاظِمِينَ الْغَيْظَ وَالْعَافِينَ عَنِ النَّاسِ',ur:'اور غصہ پینے والے اور لوگوں کو معاف کرنے والے',en:'Those who suppress anger and pardon the people — Allah loves the doers of good.',tf:'Suppressing anger is among the qualities of people of Paradise. It is not weakness — it is the highest form of strength.',rl:'Controlling your anger right now is an act that Allah Himself loves.'},
+    {sn:'Al-Araf',sa:'الْأَعْرَاف',s:7,a:199,ar:'خُذِ الْعَفْوَ وَأْمُرْ بِالْعُرْفِ وَأَعْرِض عَنِ الْجَاهِلِينَ',ur:'معافی اختیار کرو اور نیکی کا حکم دو اور جاہلوں سے منہ پھیر لو',en:'Show forgiveness, enjoin good, and turn away from the ignorant.',tf:'The divine formula for anger: forgive, promote good, and disengage from those who provoke.',rl:'Turn away from what angers you — not as weakness, but as divine wisdom.'},
+  ],
+  heartbroken:[
+    {sn:'Al-Baqarah',sa:'الْبَقَرَة',s:2,a:216,ar:'وَعَسَىٰ أَن تَكْرَهُوا شَيْئًا وَهُوَ خَيْرٌ لَّكُمْ',ur:'ممکن ہے کہ تم کسی چیز کو ناپسند کرو اور وہ تمہارے لیے بہتر ہو',en:'Perhaps you dislike a thing and it is good for you.',tf:'Allah sees what we cannot see. What breaks our heart may be the very thing that saves our soul.',rl:'The heartbreak you feel may be Allah redirecting you to something better.'},
+    {sn:'Ad-Duha',sa:'الضُّحَى',s:93,a:5,ar:'وَلَسَوْفَ يُعْطِيكَ رَبُّكَ فَتَرْضَىٰ',ur:'اور بے شک تمہارا رب تمہیں اتنا دے گا کہ تم راضی ہو جاؤ گے',en:'And your Lord is going to give you, and you will be satisfied.',tf:'This was promised to the Prophet in his darkest moments. Allah gives so much that you become fully content.',rl:'Allah has something prepared for you that will make you forget this pain.'},
+  ],
+  'seeking guidance':[
+    {sn:'Al-Fatihah',sa:'الْفَاتِحَة',s:1,a:6,ar:'اهدِنَا الصِّرَاطَ المُستَقِيمَ',ur:'ہمیں سیدھے راستے پر چلا',en:'Guide us to the straight path.',tf:'The master dua for guidance, taught by Allah and recited 17 times daily. Allah answers every sincere call.',rl:'Seeking guidance is already the first step on the straight path.'},
+    {sn:'Al-Baqarah',sa:'الْبَقَرَة',s:2,a:2,ar:'ذَٰلِكَ الْكِتَابُ لَا رَيْبَ فِيهِ هُدًى لِّلْمُتَّقِينَ',ur:'یہ وہ کتاب ہے جس میں کوئی شک نہیں، متقین کے لیے ہدایت ہے',en:'This is the Book in which there is no doubt, a guidance for those mindful of Allah.',tf:'The Quran is described as guidance from its second verse. Every answer you seek is within these pages.',rl:'The guidance you seek is in the very Book you are reading right now.'},
+  ],
+};
+
+const HADITH = [
+  {n:'Umar (RA)',b:'Sahih Bukhari',ba:'صحيح البخاري',num:'1',t:'intention niyyah action deed sincerity',ar:'إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ',en:'Actions are judged by intentions. Every person gets the reward according to what he has intended.',ur:'اعمال کا دارومدار نیتوں پر ہے',ex:'The value of any deed depends on the intention behind it. A small deed done sincerely outweighs a large deed done for show.',g:'Sahih'},
+  {n:'Anas (RA)',b:'Sahih Bukhari',ba:'صحيح البخاري',num:'13',t:'brotherhood love faith believe Muslim',ar:'لَا يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لِأَخِيهِ مَا يُحِبُّ لِنَفْسِهِ',en:'None of you truly believes until he loves for his brother what he loves for himself.',ur:'تم میں سے کوئی مومن نہیں جب تک اپنے بھائی کے لیے وہی نہ چاہے جو خود کے لیے چاہتا ہے',ex:'True faith requires transcending selfishness. Genuine concern for others is a condition of complete iman.',g:'Sahih'},
+  {n:'Abu Hurairah (RA)',b:'Sahih Bukhari',ba:'صحيح البخاري',num:'6114',t:'anger angry control self patience strong',ar:'لَيْسَ الشَّدِيدُ بِالصُّرَعَةِ إِنَّمَا الشَّدِيدُ الَّذِي يَمْلِكُ نَفْسَهُ عِنْدَ الْغَضَبِ',en:'The strong person is not the one who wrestles someone down. The strong one controls himself when angry.',ur:'طاقتور وہ نہیں جو پہلوانی میں غالب آئے، طاقتور وہ ہے جو غصے میں خود کو قابو میں رکھے',ex:'True strength in Islam is internal mastery, not physical dominance. Self-control during anger is beloved to Allah.',g:'Sahih'},
+  {n:'Abu Hurairah (RA)',b:'Sahih Muslim',ba:'صحيح مسلم',num:'2699',t:'knowledge learn study seek education wisdom quran',ar:'مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا سَهَّلَ اللَّهُ لَهُ طَرِيقًا إِلَى الْجَنَّةِ',en:'Whoever travels a path seeking knowledge, Allah will make easy for him a path to Paradise.',ur:'جو علم کی تلاش میں راستہ اختیار کرے، اللہ اس کے لیے جنت کا راستہ آسان کرتا ہے',ex:'Seeking Islamic knowledge is worship that paves the path to Paradise. Every step toward learning is a step toward Allah.',g:'Sahih'},
+  {n:'Abu Hurairah (RA)',b:'Sahih Muslim',ba:'صحيح مسلم',num:'2319',t:'kindness mercy compassion gentle soft character',ar:'إِنَّ اللَّهَ رَفِيقٌ يُحِبُّ الرِّفْقَ فِي الأَمْرِ كُلِّهِ',en:'Allah is gentle and loves gentleness in all matters.',ur:'اللہ نرم ہے اور ہر معاملے میں نرمی کو پسند کرتا ہے',ex:'Gentleness is a divine attribute. Harshness drives people away while gentleness draws them to goodness and to Islam.',g:'Sahih'},
+  {n:'Abu Hurairah (RA)',b:'Sahih Bukhari',ba:'صحيح البخاري',num:'527',t:'prayer salah namaz worship fajr dhuhr asr maghrib isha',ar:'الصَّلَاةُ عَلَى وَقْتِهَا أَفْضَلُ الْأَعْمَالِ',en:'Prayer at its proper time is the best of deeds.',ur:'وقت پر نماز پڑھنا سب سے افضل عمل ہے',ex:'Among all good deeds, praying on time holds the highest rank. It declares that Allah\'s call takes priority over worldly affairs.',g:'Sahih'},
+  {n:'Abu Hurairah (RA)',b:'Sahih Muslim',ba:'صحيح مسلم',num:'2588',t:'charity sadaqah give spend money poor help others',ar:'مَا نَقَصَتْ صَدَقَةٌ مِنْ مَالٍ',en:'Charity does not decrease wealth.',ur:'صدقہ مال کو کم نہیں کرتا',ex:'Giving does not reduce wealth — it increases barakah, brings protection and divine compensation in mysterious ways.',g:'Sahih'},
+  {n:'Abu Hurairah (RA)',b:'Sahih Bukhari',ba:'صحيح البخاري',num:'5971',t:'parents mother father family respect obey love',ar:'رَغِمَ أَنْفُهُ مَنْ أَدْرَكَ وَالِدَيْهِ عِنْدَ الْكِبَرِ فَلَمْ يَدْخُلِ الْجَنَّةَ',en:'Humiliated is the one who finds his parents in old age yet does not enter Paradise through serving them.',ur:'وہ ذلیل ہو جس نے والدین کو بڑھاپے میں پایا اور پھر بھی جنت میں داخل نہ ہوا',ex:'Parents in old age are the greatest opportunity for Paradise. Serving them with patience is a direct path to Allah\'s pleasure.',g:'Sahih'},
+  {n:'Abu Said (RA)',b:'Sahih Bukhari',ba:'صحيح البخاري',num:'5641',t:'patience hardship trial test difficulty suffering pain sad hurt',ar:'مَا يُصِيبُ الْمُسْلِمَ مِنْ نَصَبٍ وَلَا وَصَبٍ وَلَا هَمٍّ إِلَّا كَفَّرَ اللَّهُ بِهِ',en:'No fatigue, illness, anxiety or sorrow afflicts a Muslim except that Allah expiates his sins through it.',ur:'مسلمان کو جو بھی تکلیف یا غم پہنچے، اللہ اس کے ذریعے اس کے گناہ معاف فرماتا ہے',ex:'Every hardship becomes a means of purification and reward. Nothing is wasted in Allah\'s plan — even pain becomes mercy.',g:'Sahih'},
+  {n:'Anas (RA)',b:'Sunan Tirmidhi',ba:'سنن الترمذي',num:'3540',t:'forgiveness repentance tawbah sin mercy Allah',ar:'كُلُّ بَنِي آدَمَ خَطَّاءٌ وَخَيْرُ الْخَطَّائِينَ التَّوَّابُونَ',en:'Every son of Adam sins, and the best of those who sin are those who repent.',ur:'ہر انسان گناہگار ہے اور بہترین گناہگار وہ ہیں جو توبہ کریں',ex:'Sinning is human but repentance is divine. Turning back to Allah after a sin is itself a noble act.',g:'Hasan'},
+  {n:'Uthman (RA)',b:'Sahih Bukhari',ba:'صحيح البخاري',num:'5027',t:'quran recite read learn teach best',ar:'خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ',en:'The best of you are those who learn the Quran and teach it.',ur:'تم میں سب سے بہتر وہ ہے جو قرآن سیکھے اور سکھائے',ex:'The Quran holds the highest status in Islam. Those who dedicate themselves to it occupy the highest rank among believers.',g:'Sahih'},
+  {n:'Abu Dhar (RA)',b:'Sunan Tirmidhi',ba:'سنن الترمذي',num:'1956',t:'smile happy joy face brother charity kind',ar:'تَبَسُّمُكَ فِي وَجْهِ أَخِيكَ لَكَ صَدَقَةٌ',en:'Your smile in the face of your brother is an act of charity.',ur:'اپنے بھائی کے چہرے کی طرف مسکرانا صدقہ ہے',ex:'Islam makes even a smile an act of worship. Spreading joy to others is a form of charity that earns divine reward.',g:'Sahih'},
+  {n:'Ibn Umar (RA)',b:'Sunan Tirmidhi',ba:'سنن الترمذي',num:'2459',t:'death hereafter akhirah dunya world life prepare',ar:'كُنْ فِي الدُّنْيَا كَأَنَّكَ غَرِيبٌ أَوْ عَابِرُ سَبِيلٍ',en:'Be in this world as if you are a stranger or a traveler passing through.',ur:'دنیا میں ایسے رہو جیسے تم اجنبی یا راہگیر ہو',ex:'We are travelers — our real home is the akhirah. This mindset frees us from worldly attachment and anxiety.',g:'Sahih'},
+  {n:'Abdullah (RA)',b:'Sahih Bukhari',ba:'صحيح البخاري',num:'6094',t:'honesty truth truthful lies trust trustworthy character',ar:'عَلَيْكُمْ بِالصِّدْقِ فَإِنَّ الصِّدْقَ يَهْدِي إِلَى الْبِرِّ',en:'Hold fast to truthfulness, for truthfulness leads to righteousness and righteousness leads to Paradise.',ur:'سچائی کو لازم پکڑو کیونکہ سچائی نیکی کی طرف لے جاتی ہے اور نیکی جنت کی طرف',ex:'Truthfulness is a chain: truth leads to righteousness which leads to Paradise. Lying leads to wickedness and punishment.',g:'Sahih'},
+  {n:'Ibn Abbas (RA)',b:'Sahih Bukhari',ba:'صحيح البخاري',num:'6412',t:'health body blessing time youth free use',ar:'نِعْمَتَانِ مَغْبُونٌ فِيهِمَا كَثِيرٌ مِنَ النَّاسِ الصِّحَّةُ وَالْفَرَاغُ',en:'Two blessings are taken for granted by many people — good health and free time.',ur:'دو نعمتیں ہیں جن میں بہت سے لوگ خسارے میں ہیں: صحت اور فراغت',ex:'We value health and time only when we lose them. Use these blessings actively in worship before they are taken away.',g:'Sahih'},
+];
+
+var DAILY_POOL = [
+  {sn:'Al-Baqarah',sa:'الْبَقَرَة',s:2,a:286,ar:'لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا',ur:'اللہ کسی جان کو اس کی طاقت سے زیادہ تکلیف نہیں دیتا',en:'Allah does not burden a soul beyond that it can bear.',tf:'Every challenge you face is within your capacity. Allah knows your limits and designed your trials with perfect precision.'},
+  {sn:'Ash-Sharh',sa:'الشَّرْح',s:94,a:6,ar:'إِنَّ مَعَ الْعُسْرِ يُسْرًا',ur:'بے شک تکلیف کے ساتھ آسانی ہے',en:'Indeed, with hardship will be ease.',tf:'Ease travels alongside every hardship — not after it. Allah repeats this promise twice in one Surah to emphasize its certainty.'},
+  {sn:'Ar-Ra'd',sa:'الرَّعْد',s:13,a:28,ar:'أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ',ur:'سن لو اللہ کے ذکر سے دلوں کو سکون ملتا ہے',en:'Verily, in the remembrance of Allah do hearts find rest.',tf:'The prescription for every anxious heart is dhikr. No worry can survive in a heart fully occupied with remembering Allah.'},
+  {sn:'Az-Zumar',sa:'الزُّمَر',s:39,a:53,ar:'لَا تَقْنَطُوا مِن رَّحْمَةِ اللَّهِ',ur:'اللہ کی رحمت سے مایوس مت ہو',en:'Do not despair of the mercy of Allah.',tf:'No matter how far you feel, Allah commands you never to lose hope. His mercy is always greater than any sin or sorrow.'},
+  {sn:'Ad-Duha',sa:'الضُّحَى',s:93,a:5,ar:'وَلَسَوْفَ يُعْطِيكَ رَبُّكَ فَتَرْضَىٰ',ur:'تمہارا رب تمہیں اتنا دے گا کہ تم راضی ہو جاؤ گے',en:'Your Lord is going to give you, and you will be satisfied.',tf:'Revealed to the Prophet in his darkest moments. Allah gives so abundantly that complete contentment fills your heart.'},
+  {sn:'Ibrahim',sa:'إِبْرَاهِيم',s:14,a:7,ar:'لَئِن شَكَرْتُمْ لَأَزِيدَنَّكُمْ',ur:'اگر شکر کرو گے تو میں اور زیادہ دوں گا',en:'If you are grateful, I will surely increase you in favor.',tf:'Gratitude is a divine key. Be sincerely thankful and watch Allah multiply your blessings beyond what you can imagine.'},
+  {sn:'Yusuf',sa:'يُوسُف',s:12,a:87,ar:'لَا تَيْأَسُوا مِن رَّوْحِ اللَّهِ',ur:'اللہ کی رحمت سے مایوس نہ ہو',en:'Do not despair of relief from Allah.',tf:'After years of hardship, Prophet Yaqub still held hope. His hope was rewarded completely. Never stop expecting Allah's relief.'},
+  {sn:'Al-Imran',sa:'آل عِمْرَان',s:3,a:139,ar:'وَلَا تَهِنُوا وَلَا تَحْزَنُوا وَأَنتُمُ الْأَعْلَوْنَ',ur:'کمزور نہ ہو، غم نہ کرو، تم ہی غالب ہو اگر مومن ہو',en:'Do not weaken and do not grieve — you will be superior if you are believers.',tf:'Grief is human but weakness is a choice. Faith gives believers an elevation that no hardship can permanently take away.'},
+  {sn:'Al-Baqarah',sa:'الْبَقَرَة',s:2,a:152,ar:'فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي',ur:'مجھے یاد کرو، میں تمہیں یاد کروں گا اور شکر ادا کرو',en:'Remember Me, and I will remember you. Be grateful to Me.',tf:'The most profound exchange: your remembrance of Allah prompts His remembrance of you before all of creation. Gratitude deepens this bond.'},
+  {sn:'At-Talaq',sa:'الطَّلَاق',s:65,a:3,ar:'وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ',ur:'جو اللہ پر بھروسہ کرے تو وہ اس کے لیے کافی ہے',en:'Whoever relies upon Allah — then He is sufficient for him.',tf:'Complete tawakkul — trust in Allah — dissolves anxiety. When you truly hand your affairs to Allah, He handles them better than you could.'},
+  {sn:'Al-Fath',sa:'الْفَتْح',s:48,a:4,ar:'هُوَ الَّذِي أَنزَلَ السَّكِينَةَ فِي قُلُوبِ الْمُؤْمِنِينَ',ur:'وہی ہے جس نے مومنوں کے دلوں میں سکون نازل فرمایا',en:'It is He who sent down tranquility into the hearts of the believers.',tf:'Divine peace — Sakinah — is a direct gift Allah sends into believing hearts. It is not earned by effort alone but comes through faith.'},
+  {sn:'Al-Kahf',sa:'الْكَهْف',s:18,a:10,ar:'رَبَّنَا آتِنَا مِن لَّدُنكَ رَحْمَةً وَهَيِّئْ لَنَا مِنْ أَمْرِنَا رَشَدًا',ur:'اے رب رحمت عطا فرما اور ہمارے معاملے میں راہنمائی کا سامان کر',en:'Our Lord, grant us mercy and guide us rightly in our affairs.',tf:'The companions of the Cave prayed this in their darkest hour. Allah answered and made their story eternal guidance for all of humanity.'},
+  {sn:'Al-Fajr',sa:'الْفَجْر',s:89,a:27,ar:'يَا أَيَّتُهَا النَّفْسُ الْمُطْمَئِنَّةُ',ur:'اے اطمینان والی روح',en:'O tranquil soul.',tf:'Allah calls to the peaceful soul with tenderness. This is the highest state a believer reaches — complete peace through surrender to Allah.'},
+  {sn:'Al-Anfal',sa:'الْأَنفَال',s:8,a:46,ar:'إِنَّ اللَّهَ مَعَ الصَّابِرِينَ',ur:'بے شک اللہ صبر کرنے والوں کے ساتھ ہے',en:'Indeed, Allah is with the patient.',tf:'Patience is not mere endurance — it is trust in Allah's perfect timing. With that patience comes the most precious gift: Allah's company.'},
+  {sn:'Al-Baqarah',sa:'الْبَقَرَة',s:2,a:45,ar:'وَاسْتَعِينُوا بِالصَّبْرِ وَالصَّلَاةِ',ur:'صبر اور نماز سے مدد لو',en:'Seek help through patience and prayer.',tf:'When everything feels impossible, Allah prescribes two remedies: sabr and salah. Together they are the complete solution to every difficulty.'},
+  {sn:'Az-Zumar',sa:'الزُّمَر',s:39,a:10,ar:'إِنَّمَا يُوَفَّى الصَّابِرُونَ أَجْرَهُم بِغَيْرِ حِسَابٍ',ur:'صبر کرنے والوں کو ان کا اجر بے حساب دیا جائے گا',en:'The patient will be given their reward without account.',tf:'The reward for patience is so vast Allah says it cannot even be measured. No scale can hold what He has prepared for those who persevere.'},
+  {sn:'Al-Baqarah',sa:'الْبَقَرَة',s:2,a:186,ar:'وَإِذَا سَأَلَكَ عِبَادِي عَنِّي فَإِنِّي قَرِيبٌ',ur:'جب میرے بندے میرے بارے میں پوچھیں تو میں قریب ہوں',en:'When My servants ask about Me — indeed I am near.',tf:'Allah spoke directly without telling the Prophet to relay the message. The intimacy is intentional — dua is a private conversation with Allah Himself.'},
+  {sn:'Al-Imran',sa:'آل عِمْرَان',s:3,a:173,ar:'حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ',ur:'ہمارے لیے اللہ کافی ہے اور وہ بہترین کارساز ہے',en:'Allah is sufficient for us, and He is the best disposer of affairs.',tf:'Said by the Prophet facing a great army, he returned with blessings. These words are a fortress — say them when facing any fear.'},
+  {sn:'Al-Hadid',sa:'الْحَدِيد',s:57,a:4,ar:'وَهُوَ مَعَكُمْ أَيْنَ مَا كُنتُمْ',ur:'وہ تمہارے ساتھ ہے جہاں بھی تم ہو',en:'And He is with you wherever you are.',tf:'In joy or in pain, in company or in solitude, on a good day or a difficult one — Allah is always present with you. You are never truly alone.'},
+  {sn:'Al-Alaq',sa:'الْعَلَق',s:96,a:1,ar:'اقْرَأْ بِاسْمِ رَبِّكَ الَّذِي خَلَقَ',ur:'پڑھو اپنے رب کے نام سے جس نے پیدا کیا',en:'Read in the name of your Lord who created.',tf:'The first word revealed to humanity was a command to read. Knowledge sought in the name of Allah is one of the highest acts of worship.'},
+  {sn:'Luqman',sa:'لُقْمَان',s:31,a:17,ar:'يَا بُنَيَّ أَقِمِ الصَّلَاةَ وَأْمُرْ بِالْمَعْرُوفِ',ur:'اے میرے بیٹے نماز قائم کر اور نیکی کا حکم دے',en:'O my son, establish prayer and enjoin good.',tf:'The timeless advice of a wise father: prayer and goodness are the two pillars that hold a purposeful life together.'},
+  {sn:'Al-Isra',sa:'الْإِسْرَاء',s:17,a:44,ar:'وَإِن مِّن شَيْءٍ إِلَّا يُسَبِّحُ بِحَمْدِهِ',ur:'کوئی چیز ایسی نہیں جو اللہ کی تسبیح نہ کرتی ہو',en:'There is not a thing except that it glorifies His praise.',tf:'Every atom of creation worships Allah constantly. When you feel alone, you are surrounded by an entire universe engaged in His praise.'},
+  {sn:'An-Nisa',sa:'النِّسَاء',s:4,a:36,ar:'إِنَّ اللَّهَ كَانَ عَلَيْكُمْ رَقِيبًا',ur:'بے شک اللہ تم پر نگران ہے',en:'Indeed, Allah is ever over you an Observer.',tf:'Every act of goodness, every silent prayer, every tear in private — Allah sees it all. Nothing you do for His sake is ever lost.'},
+  {sn:'Al-Mulk',sa:'الْمُلْك',s:67,a:2,ar:'الَّذِي خَلَقَ الْمَوْتَ وَالْحَيَاةَ لِيَبْلُوَكُمْ أَيُّكُمْ أَحْسَنُ عَمَلًا',ur:'جس نے موت اور زندگی کو اس لیے بنایا کہ آزمائے کہ کون بہتر عمل کرتا ہے',en:'He created death and life to test which of you is best in deed.',tf:'Life is not about how long you live but how well. Every moment is a chance to do something worthy of Allah's pleasure.'},
+  {sn:'Ad-Duha',sa:'الضُّحَى',s:93,a:11,ar:'وَأَمَّا بِنِعْمَةِ رَبِّكَ فَحَدِّثْ',ur:'اور اپنے رب کی نعمت کا ذکر کرو',en:'As for the favor of your Lord — speak about it.',tf:'Talking about Allah's blessings is an act of gratitude that multiplies them. Share what He has given you and watch it increase.'},
+  {sn:'Al-Hujurat',sa:'الْحُجُرَات',s:49,a:13,ar:'إِنَّ أَكْرَمَكُمْ عِندَ اللَّهِ أَتْقَاكُمْ',ur:'بے شک اللہ کے نزدیک تم میں سب سے عزت والا وہ ہے جو سب سے زیادہ متقی ہو',en:'Indeed, the most noble of you in the sight of Allah is the most righteous.',tf:'Rank before Allah is not determined by wealth, status or appearance — only by taqwa. This levels all human pride and elevates all genuine hearts.'},
+  {sn:'Ta-Ha',sa:'طٰهٰ',s:20,a:114,ar:'رَّبِّ زِدْنِي عِلْمًا',ur:'اے میرے رب میرے علم میں اضافہ فرما',en:'My Lord, increase me in knowledge.',tf:'The shortest and most profound dua for knowledge. Allah commanded the Prophet to ask for more knowledge — it is never enough.'},
+  {sn:'Al-Baqarah',sa:'الْبَقَرَة',s:2,a:201,ar:'رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً',ur:'اے ہمارے رب دنیا میں بھی بھلائی دے اور آخرت میں بھی',en:'Our Lord, give us good in this world and good in the hereafter.',tf:'The complete dua — it asks for goodness in both worlds. The Prophet made this dua most frequently. It covers every blessing a person could want.'},
+  {sn:'Al-Imran',sa:'آل عِمْرَان',s:3,a:8,ar:'رَبَّنَا لَا تُزِغْ قُلُوبَنَا بَعْدَ إِذْ هَدَيْتَنَا',ur:'اے ہمارے رب ہدایت دینے کے بعد ہمارے دلوں کو کج نہ کرنا',en:'Our Lord, do not let our hearts deviate after You have guided us.',tf:'Even the most devout believers make this dua — they know guidance is a gift that must be maintained through prayer and humility before Allah.'},
+  {sn:'Al-Falaq',sa:'الْفَلَق',s:113,a:1,ar:'قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ',ur:'کہو میں صبح کے رب کی پناہ مانگتا ہوں',en:'Say: I seek refuge in the Lord of the daybreak.',tf:'Allah is the Lord of the break of dawn — the one who splits darkness with light. Whatever dark night you face, His dawn is coming.'},
+];
+
+const NAMES = [
+  {n:1,ar:'الرَّحْمَنُ',tr:'Ar-Rahman',en:'The Most Gracious',b:'Recite for mercy and compassion in life.'},
+  {n:2,ar:'الرَّحِيمُ',tr:'Ar-Raheem',en:'The Most Merciful',b:'Recite for forgiveness and endless mercy.'},
+  {n:3,ar:'الْمَلِكُ',tr:'Al-Malik',en:'The King',b:'Recite for authority and leadership.'},
+  {n:4,ar:'الْقُدُّوسُ',tr:'Al-Quddus',en:'The Most Holy',b:'Recite to purify your heart and soul.'},
+  {n:5,ar:'السَّلاَمُ',tr:'As-Salam',en:'The Source of Peace',b:'Recite for inner peace and safety.'},
+  {n:6,ar:'الْمُؤْمِنُ',tr:'Al-Mu\'min',en:'The Guardian of Faith',b:'Recite for protection and security.'},
+  {n:7,ar:'الْعَزِيزُ',tr:'Al-Aziz',en:'The Almighty',b:'Recite for strength and dignity.'},
+  {n:8,ar:'الْجَبَّارُ',tr:'Al-Jabbar',en:'The Compeller',b:'Recite to mend what is broken.'},
+  {n:9,ar:'الْخَالِقُ',tr:'Al-Khaliq',en:'The Creator',b:'Recite when seeking new beginnings.'},
+  {n:10,ar:'الْغَفَّارُ',tr:'Al-Ghaffar',en:'The Forgiving',b:'Recite abundantly for forgiveness.'},
+  {n:11,ar:'الرَّزَّاقُ',tr:'Ar-Razzaq',en:'The Provider',b:'Recite for sustenance and rizq.'},
+  {n:12,ar:'الْفَتَّاحُ',tr:'Al-Fattah',en:'The Opener',b:'Recite when doors seem closed.'},
+  {n:13,ar:'اَلْعَلِيمُ',tr:'Al-Alim',en:'The All-Knowing',b:'Recite for knowledge and wisdom.'},
+  {n:14,ar:'اللَّطِيفُ',tr:'Al-Latif',en:'The Subtle One',b:'Recite for hidden blessings.'},
+  {n:15,ar:'الْحَكِيمُ',tr:'Al-Hakim',en:'The Wise',b:'Recite for wisdom in decisions.'},
+  {n:16,ar:'الْوَدُودُ',tr:'Al-Wadud',en:'The Loving',b:'Recite for love and harmony.'},
+  {n:17,ar:'الشَّكُورُ',tr:'Ash-Shakur',en:'The Appreciative',b:'Recite to increase blessings.'},
+  {n:18,ar:'الصَّمَدُ',tr:'As-Samad',en:'The Eternal',b:'Recite when only Allah can help.'},
+  {n:19,ar:'النُّورُ',tr:'An-Nur',en:'The Light',b:'Recite for guidance and enlightenment.'},
+  {n:20,ar:'الْهَادِي',tr:'Al-Hadi',en:'The Guide',b:'Recite when you feel lost.'},
+  {n:21,ar:'التَّوَّابُ',tr:'At-Tawwab',en:'The Acceptor of Repentance',b:'Recite abundantly when making tawbah.'},
+  {n:22,ar:'العَفُوُّ',tr:'Al-Afuww',en:'The Pardoner',b:'Recite especially in Laylatul Qadr.'},
+  {n:23,ar:'الْحَيُّ',tr:'Al-Hayy',en:'The Ever-Living',b:'Recite for life, energy and health.'},
+  {n:24,ar:'الْقَيُّومُ',tr:'Al-Qayyum',en:'The Self-Subsisting',b:'Recite for complete reliance on Allah.'},
+  {n:25,ar:'الْغَنِيُّ',tr:'Al-Ghani',en:'The Self-Sufficient',b:'Recite to remove dependency on others.'},
+  {n:26,ar:'الصَّبُورُ',tr:'As-Sabur',en:'The Patient',b:'Recite for patience during hardship.'},
+  {n:27,ar:'الْمُجِيبُ',tr:'Al-Mujib',en:'The Responsive',b:'Recite when making dua.'},
+  {n:28,ar:'الْوَاسِعُ',tr:'Al-Wasi',en:'The All-Encompassing',b:'Recite to remember Allah\'s boundless mercy.'},
+  {n:29,ar:'الْكَرِيمُ',tr:'Al-Karim',en:'The Most Generous',b:'Recite for generosity and abundance.'},
+  {n:30,ar:'الرَّقِيبُ',tr:'Ar-Raqib',en:'The Ever-Watchful',b:'Recite to feel Allah\'s presence always.'},
+  {n:31,ar:'الْقَرِيبُ',tr:'Al-Qarib',en:'The Near',b:'Recite to feel closeness to Allah.'},
+  {n:32,ar:'الْوَلِيُّ',tr:'Al-Wali',en:'The Protecting Friend',b:'Recite for divine friendship and support.'},
+  {n:33,ar:'الْمُقِيتُ',tr:'Al-Muqit',en:'The Sustainer',b:'Recite for provision and nourishment.'},
+];
+
+const DHIKR_LIST = [
+  {ar:'سُبْحَانَ اللَّهِ',tr:'SubhanAllah',meaning:'Glory be to Allah',count:33,reward:'Plants a tree in Jannah'},
+  {ar:'الْحَمْدُ لِلَّهِ',tr:'Alhamdulillah',meaning:'All praise be to Allah',count:33,reward:'Fills the scales of good deeds'},
+  {ar:'اللَّهُ أَكْبَرُ',tr:'Allahu Akbar',meaning:'Allah is the Greatest',count:33,reward:'Beloved to Allah'},
+  {ar:'لَا إِلَهَ إِلَّا اللَّهُ',tr:'La ilaha illallah',meaning:'No god but Allah',count:100,reward:'Best of all dhikr'},
+  {ar:'أَسْتَغْفِرُ اللَّهَ',tr:'Astaghfirullah',meaning:'I seek forgiveness',count:100,reward:'Opens doors of mercy'},
+  {ar:'لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ',tr:'La hawla wala quwwata',meaning:'No power except Allah',count:100,reward:'Treasure of Jannah'},
+];
+
+// ════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════
+const S = {
+  tab: 'home',
+  home: { query:'', emotion:'', loading:false, results:null, error:'', showHistory:false },
+  hadith: { query:'', loading:false, results:null, error:'' },
+  names: { search:'', selected:null },
+  prayer: { input:'', loading:false, times:null, city:'', error:'', now:new Date() },
+  dhikr: { idx:0, count:0, sessions: JSON.parse(localStorage.getItem('noor_dhikr')||'{}') },
+};
+
+// ════════════════════════════════════════════════════════
+// STORAGE
+// ════════════════════════════════════════════════════════
+const BM = {
+  all: () => JSON.parse(localStorage.getItem('noor_bm')||'[]'),
+  has: (s,a) => BM.all().some(b => b.s===s && b.a===a),
+  add: x => { const l=BM.all(); if(!BM.has(x.s,x.a)){l.unshift({...x,ts:Date.now()}); localStorage.setItem('noor_bm',JSON.stringify(l)); return true;} return false; },
+  rem: (s,a) => localStorage.setItem('noor_bm', JSON.stringify(BM.all().filter(b=>!(b.s===s&&b.a===a)))),
+};
+const HIST = {
+  all: () => JSON.parse(localStorage.getItem('noor_hist')||'[]'),
+  add: q => { const h=HIST.all().filter(x=>x!==q).slice(0,7); localStorage.setItem('noor_hist',JSON.stringify([q,...h])); },
+};
+
+// ════════════════════════════════════════════════════════
+// API
+// ════════════════════════════════════════════════════════
+const GEMINI_MODELS = ['gemini-2.0-flash-lite','gemini-1.5-flash-8b','gemini-1.5-flash','gemini-2.0-flash'];
+let lastApiCall = 0;
+
+function getKey() { return localStorage.getItem('noor_gemini_key')||''; }
+
+async function callGemini(key, model, prompt, retry=0) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+  const r = await fetch(url, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ contents:[{parts:[{text:prompt}]}], generationConfig:{temperature:0.7,maxOutputTokens:2000} })
+  });
+  if (r.status===429) {
+    if (retry<2) { await wait((retry+1)*8000); return callGemini(key,model,prompt,retry+1); }
+    throw new Error('RATE_LIMIT');
+  }
+  if (r.status===401||r.status===403) throw new Error('INVALID_KEY');
+  if (r.status===404||r.status===400) throw new Error('MODEL_NOT_FOUND');
+  if (!r.ok) throw new Error('ERR_'+r.status);
+  const d = await r.json();
+  const txt = d.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!txt) throw new Error('NO_TEXT');
+  return txt;
+}
+
+async function ai(system, msg) {
+  if (!navigator.onLine) throw new Error('You are offline');
+  const gap = Date.now()-lastApiCall;
+  if (gap<3000) await wait(3000-gap);
+  lastApiCall = Date.now();
+  let key = getKey();
+  if (!key) {
+    const k = prompt('Enter FREE Gemini API key:\n\nGet it at: aistudio.google.com\n1. Sign in with Google\n2. Click "Get API Key"\n3. Paste here');
+    if (k && k.length>10) { localStorage.setItem('noor_gemini_key',k.trim()); key=k.trim(); }
+    else throw new Error('API key needed. Get free key at aistudio.google.com');
+  }
+  const full = system+'\n\nRequest: '+msg;
+  for (const model of GEMINI_MODELS) {
+    try { return await callGemini(key,model,full); }
+    catch(e) { if (e.message==='INVALID_KEY') throw new Error('Invalid API key. Get free key at aistudio.google.com'); continue; }
+  }
+  throw new Error('AI unavailable right now');
+}
+
+function safeJSON(raw, type) {
+  const t = raw.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+  const [o,c] = type==='obj' ? ['{','}'] : ['[',']'];
+  const s=t.indexOf(o), e=t.lastIndexOf(c);
+  if (s===-1||e<=s) throw new Error('No JSON found');
+  try { return JSON.parse(t.slice(s,e+1)); }
+  catch { return JSON.parse(t.slice(s,e+1).replace(/,\s*[}\]]/g,m=>m[m.length-1])); }
+}
+
+function wait(ms) { return new Promise(r=>setTimeout(r,ms)); }
+
+// ════════════════════════════════════════════════════════
+// OFFLINE SEARCH
+// ════════════════════════════════════════════════════════
+const KW = {
+  sad:['sad','cry','crying','tears','depressed','grief','sorrow','unhappy','pain','lonely','alone','miserable','darkness'],
+  anxious:['anxious','anxiety','worry','worried','stress','stressed','nervous','panic','scared','tension','overwhelmed'],
+  grateful:['grateful','gratitude','thankful','thanks','blessing','blessed','happy','joy','alhamdulillah','appreciate'],
+  lost:['lost','confused','direction','purpose','meaning','path','guide','guidance','decision','unsure','searching'],
+  hopeful:['hope','hopeful','future','dream','better','success','positive','waiting','trust'],
+  afraid:['afraid','fear','scared','terrified','danger','unsafe','death','sick','illness','dread'],
+  peaceful:['peace','peaceful','calm','serene','tranquil','quiet','content','relax','rest','harmony'],
+  angry:['angry','anger','rage','furious','mad','frustrated','irritated','betrayed','injustice','unfair'],
+  heartbroken:['heartbroken','heartbreak','breakup','rejection','abandoned','unloved','betrayal','devastated'],
+  'seeking guidance':['guidance','guide','help','confused','direction','decision','right','wrong','halal','haram','faith'],
+};
+
+function detectEmotion(txt) {
+  const low = txt.toLowerCase();
+  let best=null, top=0;
+  for (const [k,ws] of Object.entries(KW)) {
+    const c=ws.filter(w=>low.includes(w)).length;
+    if (c>top){top=c;best=k;}
+  }
+  return best;
+}
+
+function getAyat(emotion, query) {
+  const key = emotion || (query ? detectEmotion(query) : null);
+  const pool = (key && AYAT[key]) ? [...AYAT[key]] : Object.values(AYAT).flat();
+  return pool.sort(()=>Math.random()-0.5).slice(0,2);
+}
+
+var HADITH_KW={
+  sad:['patience','hardship','trial'],depressed:['patience','hardship'],
+  anxious:['patience','trust','hardship'],worried:['patience','trust'],
+  angry:['anger','control','self'],anger:['anger','control'],
+  family:['parents','mother','father'],mother:['parents','mother'],
+  father:['parents','mother','father'],parents:['parents','mother'],
+  prayer:['prayer','salah','namaz'],salah:['prayer','salah','namaz'],
+  namaz:['prayer','salah','namaz'],
+  quran:['quran','recite','teach'],
+  learn:['knowledge','learn','study'],knowledge:['knowledge','learn'],
+  forgive:['forgiveness','repentance','sin'],forgiveness:['forgiveness','repentance'],
+  sin:['forgiveness','repentance'],repent:['forgiveness','repentance'],
+  charity:['charity','sadaqah','give'],money:['charity','sadaqah'],
+  honest:['honesty','truth'],truth:['honesty','truth'],
+  lie:['honesty','truth','lies'],lying:['honesty','truth'],
+  smile:['smile','happy','joy'],happy:['smile','happy','joy'],
+  death:['death','hereafter','dunya'],hereafter:['death','hereafter'],
+  world:['hereafter','dunya'],dunya:['hereafter','dunya'],
+  health:['health','body','blessing'],time:['health','time'],
+  friend:['brotherhood','love','faith'],brother:['brotherhood','love'],
+  love:['brotherhood','love','kindness'],kind:['kindness','mercy'],
+  mercy:['kindness','mercy','compassion'],
+  intention:['intention','niyyah'],niyyah:['intention','niyyah'],
+  strong:['anger','control','strong'],dhikr:['dhikr','remembrance'],
+  remember:['dhikr','remembrance'],
+};
+
+function searchHadith(q) {
+  if (!q || !q.trim()) return [...HADITH].sort(() => Math.random()-0.5).slice(0,2);
+  var low = q.toLowerCase().trim();
+  var words = low.split(/\s+/).filter(function(w){return w.length > 2;});
+  var exp = {};
+  words.forEach(function(w) {
+    exp[w] = 1;
+    if (HADITH_KW[w]) HADITH_KW[w].forEach(function(k){ exp[k]=1; });
+  });
+  var allW = Object.keys(exp);
+  var scored = HADITH.map(function(h) {
+    var txt = (h.en + ' ' + h.ex + ' ' + (h.t||'')).toLowerCase();
+    var score = 0;
+    if (txt.includes(low)) score += 15;
+    allW.forEach(function(w) {
+      if ((h.t||'').toLowerCase().includes(w)) score += 4;
+      if (txt.includes(w)) score += 2;
+    });
+    return Object.assign({}, h, {score: score});
+  }).filter(function(h){return h.score > 0;}).sort(function(a,b){return b.score-a.score;});
+  if (scored.length >= 2) return scored.slice(0,2);
+  if (scored.length === 1) {
+    var rest = HADITH.filter(function(h){return h !== scored[0];});
+    return [scored[0], rest[Math.floor(Math.random()*rest.length)]];
+  }
+  return [...HADITH].sort(()=>Math.random()-0.5).slice(0,2);
+}
+
+// ════════════════════════════════════════════════════════
+// SHARE CARD
+// ════════════════════════════════════════════════════════
+function shareCard(ayat) {
+  const cv=document.createElement('canvas'); cv.width=1080; cv.height=1080;
+  const ctx=cv.getContext('2d');
+  const bg=ctx.createLinearGradient(0,0,1080,1080);
+  bg.addColorStop(0,'#0a2020'); bg.addColorStop(1,'#0d3535');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,1080,1080);
+  ctx.strokeStyle='rgba(201,168,76,0.4)'; ctx.lineWidth=8; ctx.strokeRect(30,30,1020,1020);
+  ctx.font='72px serif'; ctx.textAlign='center'; ctx.fillText('🌙',540,140);
+  ctx.fillStyle='#e8c97a'; ctx.font='italic 50px Georgia'; ctx.fillText('Noor — نور',540,210);
+  ctx.strokeStyle='rgba(201,168,76,0.25)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(150,240); ctx.lineTo(930,240); ctx.stroke();
+  ctx.fillStyle='rgba(201,168,76,0.6)'; ctx.font='26px sans-serif';
+  ctx.fillText((ayat.sa||'')+'  '+ayat.sn+' '+ayat.s+':'+ayat.a,540,290);
+  ctx.fillStyle='#fdf6e3'; ctx.font='36px serif';
+  const words=ayat.ar.split(' '); let ln='',y=400,lines=[];
+  for (let w of words){const t=ln+w+' ';if(ctx.measureText(t).width>900&&ln){lines.push(ln.trim());ln=w+' ';}else ln=t;}
+  lines.push(ln.trim()); lines.forEach(l=>{ctx.fillText(l,540,y);y+=54;});
+  ctx.strokeStyle='rgba(201,168,76,0.18)'; ctx.beginPath(); ctx.moveTo(150,y+20); ctx.lineTo(930,y+20); ctx.stroke();
+  ctx.fillStyle='rgba(253,246,227,0.65)'; ctx.font='25px sans-serif';
+  const ew=ayat.en.split(' '); let el='',ey=y+68,els=[];
+  for (let w of ew){const t=el+w+' ';if(ctx.measureText(t).width>860&&el){els.push(el.trim());el=w+' ';}else el=t;}
+  els.push(el.trim()); els.forEach(l=>{ctx.fillText(l,540,ey);ey+=40;});
+  ctx.fillStyle='rgba(201,168,76,0.3)'; ctx.font='19px sans-serif';
+  ctx.fillText('Noor App — AI Quranic Guidance',540,980);
+  return cv.toDataURL('image/png');
+}
+
+// ════════════════════════════════════════════════════════
+// ONBOARDING
+// ════════════════════════════════════════════════════════
+let obStep = 0;
+
+function showObSlide(i) {
+  const sl = ONBOARD_SLIDES[i];
+  document.getElementById('ob-icon').textContent = sl.icon;
+  document.getElementById('ob-title').textContent = sl.title;
+  document.getElementById('ob-arabic').textContent = sl.arabic;
+  document.getElementById('ob-desc').textContent = sl.desc;
+  // Dots
+  const dots = document.getElementById('ob-dots');
+  dots.innerHTML = ONBOARD_SLIDES.map((_,j)=>
+    `<div class="ob-dot${j===i?' active':''}" style="width:${j===i?28:8}px"></div>`
+  ).join('');
+  // Buttons
+  const next = document.getElementById('ob-next');
+  const back = document.getElementById('ob-back');
+  back.style.display = i>0 ? 'inline-block' : 'none';
+  if (i < ONBOARD_SLIDES.length-1) { next.textContent='Next →'; next.onclick=()=>goOb(i+1); }
+  else { next.textContent='🌙 Begin Your Journey'; next.onclick=finishOb; }
+}
+
+function goOb(i) { obStep=i; showObSlide(i); }
+
+function finishOb() {
+  localStorage.setItem('noor_onboarded','1');
+  document.getElementById('onboarding').style.display='none';
+  document.getElementById('app').classList.add('show');
+  initApp();
+}
+
+document.getElementById('ob-back').onclick = () => goOb(Math.max(0,obStep-1));
+document.getElementById('ob-skip').onclick = finishOb;
+
+// Init onboarding or app
+if (localStorage.getItem('noor_onboarded')) {
+  document.getElementById('onboarding').style.display='none';
+  document.getElementById('app').classList.add('show');
+  initApp();
+} else {
+  showObSlide(0);
+}
+
+// ════════════════════════════════════════════════════════
+// RENDER HELPERS
+// ════════════════════════════════════════════════════════
+function adBanner() {
+  const ads = [
+    {bg:'#1a3a2a',title:'📚 Islamic Books',desc:'Authentic books. 10% off with code NOOR',cta:'Shop Now'},
+    {bg:'#1a2a3a',title:'✈️ Umrah Packages',desc:'All-inclusive from Pakistan — best price',cta:'Get Quote'},
+    {bg:'#2a1a3a',title:'🎓 Learn Quran Online',desc:'1-on-1 certified teachers. First class FREE',cta:'Start Free'},
+  ];
+  const ad=ads[Math.floor(Math.random()*ads.length)];
+  return `<div class="ad-banner" style="background:${ad.bg}">
+    <div style="flex:1">
+      <div style="font-size:0.55rem;letter-spacing:2px;color:rgba(201,168,76,0.35);font-weight:700;margin-bottom:2px">SPONSORED · HALAL AD</div>
+      <div style="font-size:0.9rem;font-weight:700;color:#e8c97a;margin-bottom:2px">${ad.title}</div>
+      <div style="font-size:0.73rem;color:rgba(253,246,227,0.45)">${ad.desc}</div>
+    </div>
+    <button class="ad-cta">${ad.cta} →</button>
+  </div>`;
+}
+
+function ayatCard(a) {
+  const bm = BM.has(a.s,a.a);
+  const id = `bm_${a.s}_${a.a}`;
+  return `<div class="ayat-card fade">
+    <div class="ayat-meta">
+      <div class="ayat-ref"><span style="font-family:'Amiri',serif;font-size:1rem">${a.sa||''}</span> · ${a.sn} ${a.s}:${a.a}</div>
+      <div class="ayat-actions">
+        <button class="action-btn" onclick="playAudio(${a.s},${a.a},this)">▶ Play</button>
+        <button class="action-btn ${bm?'active':''}" id="${id}" onclick="toggleBM(${JSON.stringify(a).replace(/"/g,'&quot;')})">${bm?'🔖 Saved':'🔖 Save'}</button>
+        <button class="action-btn" onclick="shareAyat(${JSON.stringify(a).replace(/"/g,'&quot;')})">📤</button>
+      </div>
+    </div>
+    <div class="ayat-arabic">${a.ar}<div class="ayat-ref-small">[${a.sn} ${a.s}:${a.a}]</div></div>
+    <div class="ayat-translations">
+      <div class="trans-row">
+        <div class="lang-badge">UR</div>
+        <div style="flex:1"><div class="trans-label">اردو ترجمہ</div><div class="trans-urdu">${a.ur}</div></div>
+      </div>
+      <div class="trans-row">
+        <div class="lang-badge">EN</div>
+        <div style="flex:1"><div class="trans-label">English</div><div class="trans-english">${a.en}</div></div>
+      </div>
+    </div>
+    ${a.tf?`<div class="ayat-tafseer">
+      <div class="section-label" style="margin-bottom:8px">Tafseer & Reflection</div>
+      <div class="tafseer-text">${a.tf}</div>
+      ${a.rl?`<div class="relevance-box">${a.rl}</div>`:''}
+    </div>`:''}
+  </div>`;
+}
+
+function hadithCard(h) {
+  return `<div class="hadith-card fade">
+    <div class="card-header">
+      <div class="ayat-ref"><span style="font-family:'Amiri',serif">${h.ba}</span> · ${h.b} #${h.num}</div>
+      <div class="grade-badge">${h.g}</div>
+    </div>
+    <div class="hadith-arabic">${h.ar}</div>
+    <div class="hadith-body">
+      <div class="trans-row">
+        <div class="lang-badge">UR</div>
+        <div style="flex:1"><div class="trans-label">اردو</div><div class="trans-urdu">${h.ur}</div></div>
+      </div>
+      <div class="trans-row">
+        <div class="lang-badge">EN</div>
+        <div style="flex:1"><div class="trans-label">English</div><div class="trans-english">${h.en}</div></div>
+      </div>
+    </div>
+    <div class="hadith-explanation">
+      <div class="section-label" style="margin-bottom:7px">Explanation</div>
+      <div style="font-size:0.87rem;line-height:1.75;color:rgba(253,246,227,0.6)">${h.ex}</div>
+    </div>
+  </div>`;
+}
+
+function loader(text) {
+  return `<div class="loader"><div class="spinner spin"></div><div class="loader-text">${text}</div><div class="loader-arabic">اللَّهُ أَكْبَرُ</div></div>`;
+}
+
+// ════════════════════════════════════════════════════════
+// TABS
+// ════════════════════════════════════════════════════════
+const TABS = [
+  {id:'home',icon:'🏠',label:'Home'},
+  {id:'hadith',icon:'📜',label:'Hadith'},
+  {id:'names',icon:'✨',label:'Names'},
+  {id:'prayer',icon:'🕌',label:'Prayer'},
+  {id:'dhikr',icon:'📿',label:'Dhikr'},
+  {id:'bookmarks',icon:'🔖',label:'Saved'},
+];
+
+function renderNav() {
+  document.getElementById('nav').innerHTML = TABS.map(t=>
+    `<button class="nav-btn${S.tab===t.id?' active':''}" onclick="switchTab('${t.id}')">
+      <span class="nav-icon">${t.icon}</span>
+      <span class="nav-label">${t.label}</span>
+      <div class="nav-dot"></div>
+    </button>`
+  ).join('');
+}
+
+function renderContent() {
+  const el = document.getElementById('content');
+  switch(S.tab) {
+    case 'home': el.innerHTML = renderHome(); bindHome(); break;
+    case 'hadith': el.innerHTML = renderHadith(); bindHadith(); break;
+    case 'names': el.innerHTML = renderNames(); bindNames(); break;
+    case 'prayer': el.innerHTML = renderPrayer(); bindPrayer(); break;
+    case 'dhikr': el.innerHTML = renderDhikr(); break;
+    case 'bookmarks': el.innerHTML = renderBookmarks(); break;
+  }
+}
+
+function render() { renderNav(); renderContent(); }
+
+// ════════════════════════════════════════════════════════
+// HOME TAB
+// ════════════════════════════════════════════════════════
+function renderHome() {
+  const h = S.home;
+  const hist = HIST.all();
+  return `
+    <div class="card">
+      <div class="section-label" style="margin-bottom:14px">🔍 Find Ayat by Emotion or Topic</div>
+      <div class="emotion-grid">
+        ${EMOTIONS.map(e=>`<button class="emotion-btn${h.emotion===e.k?' active':''}" onclick="toggleEmotion('${e.k}')">${e.e} ${e.l}</button>`).join('')}
+      </div>
+      <textarea id="searchInput" rows="2" placeholder="Type what you are going through…" style="resize:none;display:block">${h.query}</textarea>
+      ${h.showHistory&&hist.length?`
+        <div class="history-dropdown">
+          <div style="font-size:0.6rem;text-transform:uppercase;letter-spacing:2px;color:rgba(201,168,76,0.4);padding:7px 13px 3px;font-weight:700">Recent</div>
+          ${hist.map((q,i)=>`<div class="history-item" onclick="useHist(${i})">🕐 ${q}</div>`).join('')}
+        </div>` : ''}
+      <button class="search-btn" onclick="doSearch()">✨ Find Ayat</button>
+    </div>
+
+    ${h.loading ? loader('Searching the Holy Quran…') : ''}
+    ${h.error ? `<div class="error-box">⚠️ ${h.error}</div>` : ''}
+    ${!h.loading&&h.results ? `
+      <div style="text-align:center;font-size:0.63rem;text-transform:uppercase;letter-spacing:2px;color:rgba(201,168,76,0.4);margin-bottom:14px">
+        ${h.emotion&&h.query?`Feeling ${h.emotion} · "${h.query}"`:h.emotion?`Feeling ${h.emotion}`:`"${h.query}"`}
+      </div>
+      ${adBanner()}
+      ${h.results.map(a=>ayatCard(a)).join('')}
+    ` : ''}
+    ${!h.loading&&!h.results&&!h.error ? `
+      <div class="empty-state">
+        <div class="empty-icon">📖</div>
+        <div style="font-size:0.95rem">Select an emotion or type a topic above</div>
+        <div style="font-family:'Amiri',serif;font-size:1.5rem;color:rgba(201,168,76,0.22);margin-top:10px">اِقْرَأْ بِاسْمِ رَبِّكَ</div>
+      </div>` : ''}
+  `;
+}
+
+function bindHome() {
+  const si = document.getElementById('searchInput');
+  if (!si) return;
+  si.addEventListener('input', e => {
+    S.home.query = e.target.value;
+    const should = !e.target.value && HIST.all().length>0;
+    if (should !== S.home.showHistory) { S.home.showHistory=should; const c=si.selectionStart; render(); document.getElementById('searchInput')?.focus(); }
+  });
+  si.addEventListener('focus', () => {
+    if (!S.home.query && HIST.all().length>0 && !S.home.showHistory) {
+      S.home.showHistory=true; render(); document.getElementById('searchInput')?.focus();
+    }
+  });
+  si.addEventListener('blur', () => setTimeout(()=>{ if(S.home.showHistory){S.home.showHistory=false; render();} },200));
+  si.addEventListener('keydown', e => { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();doSearch();} });
+}
+
+// ════════════════════════════════════════════════════════
+// HADITH TAB
+// ════════════════════════════════════════════════════════
+const HADITH_TOPICS = ['patience','prayer','kindness','anger','honesty','parents','charity','knowledge','forgiveness','brotherhood','smile','death','quran','health'];
+
+function renderHadith() {
+  const h = S.hadith;
+  return `
+    <div class="card">
+      <div class="section-label" style="margin-bottom:14px">📜 Hadith Search</div>
+      <div style="display:flex;gap:10px">
+        <input type="text" id="hadithInput" value="${h.query}" placeholder="e.g. patience, prayer, kindness…">
+        <button onclick="doHadith()" style="background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:12px;padding:11px 16px;color:#1a1208;font-weight:700;font-size:0.9rem;white-space:nowrap">${h.loading?'⏳':'🔍 Search'}</button>
+      </div>
+      <div class="topics">
+        ${HADITH_TOPICS.map(t=>`<button class="topic-pill" onclick="quickHadith('${t}')">${t}</button>`).join('')}
+      </div>
+    </div>
+
+    ${h.loading ? loader('Searching hadith collections…') : ''}
+    ${h.error ? `<div class="error-box">⚠️ ${h.error}</div>` : ''}
+    ${!h.loading&&h.results ? h.results.map(x=>hadithCard(x)).join('')+adBanner() : ''}
+    ${!h.loading&&!h.results&&!h.error ? `
+      <div class="empty-state">
+        <div class="empty-icon">📜</div>
+        <div>Search or tap a topic above</div>
+      </div>` : ''}
+  `;
+}
+
+function bindHadith() {
+  const hi = document.getElementById('hadithInput');
+  if (!hi) return;
+  hi.addEventListener('input', e => { S.hadith.query=e.target.value; });
+  hi.addEventListener('keydown', e => { if(e.key==='Enter') doHadith(); });
+}
+
+// ════════════════════════════════════════════════════════
+// NAMES TAB
+// ════════════════════════════════════════════════════════
+function renderNames() {
+  const n = S.names;
+  const filtered = NAMES.filter(x =>
+    x.tr.toLowerCase().includes(n.search.toLowerCase()) ||
+    x.en.toLowerCase().includes(n.search.toLowerCase()) ||
+    x.ar.includes(n.search)
+  );
+  return `
+    <div class="card">
+      <div class="section-label" style="margin-bottom:14px">✨ 99 Names of Allah — الأسماء الحسنى</div>
+      <input type="text" id="namesSearch" value="${n.search}" placeholder="Search by name or meaning…">
+    </div>
+    ${n.selected ? `
+      <div class="name-detail">
+        <div style="font-family:'Amiri',serif;font-size:3.5rem;color:#e8c97a;margin-bottom:10px">${n.selected.ar}</div>
+        <div style="font-size:1.3rem;color:#e8c97a;font-weight:700">${n.selected.tr}</div>
+        <div style="font-size:0.9rem;color:rgba(253,246,227,0.5);margin-top:4px">${n.selected.en}</div>
+        <div style="font-size:0.85rem;color:rgba(201,168,76,0.75);margin-top:16px;font-style:italic;line-height:1.7">${n.selected.b}</div>
+        <button onclick="S.names.selected=null;render()" style="margin-top:14px;background:var(--gold-soft);border:1px solid var(--border);border-radius:8px;padding:6px 16px;color:var(--gold);font-size:0.8rem">✕ Close</button>
+      </div>` : ''}
+    <div class="names-grid">
+      ${filtered.map(x=>`
+        <div class="name-card" onclick="S.names.selected=NAMES.find(n=>n.n===${x.n});render()">
+          <div class="name-num">${x.n}</div>
+          <div class="name-arabic">${x.ar}</div>
+          <div class="name-tr">${x.tr}</div>
+          <div class="name-en">${x.en}</div>
+        </div>`).join('')}
+    </div>
+  `;
+}
+
+function bindNames() {
+  const ns = document.getElementById('namesSearch');
+  if (!ns) return;
+  ns.addEventListener('input', e => { S.names.search=e.target.value; const c=ns.selectionStart; render(); const n=document.getElementById('namesSearch'); if(n){n.focus();n.setSelectionRange(c,c);} });
+}
+
+// ════════════════════════════════════════════════════════
+// PRAYER TAB
+// ════════════════════════════════════════════════════════
+function renderPrayer() {
+  const p = S.prayer;
+  const now = S.prayer.now;
+  const nm = now.getHours()*60+now.getMinutes();
+  const icons = {Fajr:'🌄',Sunrise:'🌅',Dhuhr:'☀️',Asr:'🌤️',Maghrib:'🌇',Isha:'🌙'};
+  const next = p.times ? Object.entries(p.times).find(([,t])=>{const[hh,mm]=t.split(':').map(Number);return hh*60+mm>nm;})?.[0]||'Fajr' : null;
+  return `
+    <div class="card">
+      <div class="section-label" style="margin-bottom:14px">🕌 Prayer Times</div>
+      <div class="time-display" id="clock">${now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}</div>
+      <div class="date-display">${now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})}</div>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <input type="text" id="cityInput" value="${p.input}" placeholder="Enter city — e.g. Karachi">
+        <button onclick="fetchPrayer()" style="background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:12px;padding:11px 14px;color:#1a1208;font-weight:700;font-size:0.82rem;white-space:nowrap">${p.loading?'⏳':'Get Times'}</button>
+      </div>
+      ${p.error?`<div style="color:rgba(255,180,180,0.75);font-size:0.8rem;margin-top:8px">⚠️ ${p.error}</div>`:''}
+    </div>
+    ${p.times ? `
+      <div class="card">
+        <div style="text-align:center;font-weight:600;color:#e8c97a;margin-bottom:14px">📍 ${p.city}</div>
+        ${next?`<div class="next-badge">
+          <div style="font-size:0.6rem;text-transform:uppercase;letter-spacing:2px;color:rgba(201,168,76,0.5);margin-bottom:4px">Next Prayer</div>
+          <div style="font-size:1.1rem;color:#e8c97a;font-weight:700">${icons[next]||'🕌'} ${next} — ${p.times[next]}</div>
+        </div>`:''}
+        ${Object.entries(p.times).map(([name,time])=>`
+          <div class="prayer-row${next===name?' next':''}">
+            <div style="font-size:0.93rem;color:${next===name?'#e8c97a':'var(--text2)'}">${icons[name]||'🕌'} ${name}</div>
+            <div style="font-weight:700;font-size:0.95rem;color:${next===name?'#e8c97a':'var(--text2)'}">${time}</div>
+          </div>`).join('')}
+      </div>` :
+      `<div class="empty-state"><div class="empty-icon">🕌</div><div>Enter your city for prayer times</div></div>`
+    }
+  `;
+}
+
+function bindPrayer() {
+  const ci = document.getElementById('cityInput');
+  if (!ci) return;
+  ci.addEventListener('input', e => { S.prayer.input=e.target.value; });
+  ci.addEventListener('keydown', e => { if(e.key==='Enter') fetchPrayer(); });
+}
+
+// ════════════════════════════════════════════════════════
+// DHIKR TAB
+// ════════════════════════════════════════════════════════
+function renderDhikr() {
+  const d = S.dhikr;
+  const sel = DHIKR_LIST[d.idx];
+  const pct = Math.min((d.count/sel.count)*100,100);
+  const r=62, circ=2*Math.PI*r;
+  const today = new Date().toDateString();
+  const todayStats = DHIKR_LIST.filter(dk => (d.sessions[`${today}_${dk.tr}`]||0)>0);
+  return `
+    <div class="card dhikr-list">
+      <div class="section-label" style="margin-bottom:12px">📿 Choose Dhikr</div>
+      ${DHIKR_LIST.map((dk,i)=>`
+        <div class="dhikr-item${d.idx===i?' active':''}" onclick="S.dhikr.idx=${i};S.dhikr.count=0;render()">
+          <div>
+            <div style="font-family:'Amiri',serif;font-size:1.1rem;color:${d.idx===i?'#e8c97a':'var(--text2)'}">${dk.ar}</div>
+            <div style="font-size:0.7rem;color:rgba(201,168,76,0.5);margin-top:2px">${dk.tr} · ${dk.meaning}</div>
+          </div>
+          <div style="font-size:0.68rem;color:rgba(201,168,76,0.4)">×${dk.count}</div>
+        </div>`).join('')}
+    </div>
+
+    <div class="dhikr-counter">
+      <div style="font-family:'Amiri',serif;font-size:2rem;color:#e8c97a;margin-bottom:4px">${sel.ar}</div>
+      <div style="font-size:0.82rem;color:rgba(201,168,76,0.55);margin-bottom:20px">${sel.meaning}</div>
+      <div style="position:relative;width:150px;height:150px;margin:0 auto 18px">
+        <svg width="150" height="150" style="transform:rotate(-90deg)">
+          <circle cx="75" cy="75" r="${r}" fill="none" stroke="rgba(201,168,76,0.12)" stroke-width="9"/>
+          <circle cx="75" cy="75" r="${r}" fill="none" stroke="#c9a84c" stroke-width="9" stroke-linecap="round"
+            stroke-dasharray="${circ}" stroke-dashoffset="${circ*(1-pct/100)}" style="transition:stroke-dashoffset 0.3s"/>
+        </svg>
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+          <div style="font-size:2.8rem;font-weight:800;color:#e8c97a;line-height:1">${d.count}</div>
+          <div style="font-size:0.68rem;color:rgba(201,168,76,0.45);margin-top:3px">of ${sel.count}</div>
+        </div>
+      </div>
+      <button class="dhikr-tap" onclick="tapDhikr()">📿</button>
+      <div style="font-size:0.78rem;color:rgba(201,168,76,0.6);font-style:italic;margin-bottom:14px">${sel.reward}</div>
+      <button onclick="S.dhikr.count=0;render()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 18px;color:var(--text3);font-size:0.8rem">↺ Reset</button>
+      ${todayStats.length?`
+        <div style="margin-top:18px;border-top:1px solid var(--border2);padding-top:14px">
+          <div class="section-label" style="margin-bottom:10px">Today's Progress</div>
+          <div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap">
+            ${todayStats.map(dk=>{const c=d.sessions[`${today}_${dk.tr}`]||0;return`<div style="text-align:center"><div style="font-size:0.75rem;color:var(--gold);font-weight:700">${c}</div><div style="font-size:0.6rem;color:var(--text3)">${dk.tr}</div></div>`;}).join('')}
+          </div>
+        </div>` : ''}
+    </div>
+  `;
+}
+
+// ════════════════════════════════════════════════════════
+// BOOKMARKS TAB
+// ════════════════════════════════════════════════════════
+function renderBookmarks() {
+  const bm = BM.all();
+  if (!bm.length) return `<div class="empty-state"><div class="empty-icon">🔖</div><div>No saved Ayat yet</div><div style="font-size:0.8rem;margin-top:8px;color:var(--text3)">Tap 🔖 Save on any Ayat</div></div>`;
+  return `
+    <div class="section-label" style="margin-bottom:16px">🔖 Saved Ayat (${bm.length})</div>
+    ${bm.map(a=>`${ayatCard(a)}<button onclick="BM.rem(${a.s},${a.a});render()" style="display:block;margin:-8px auto 16px;background:rgba(180,50,50,0.12);border:1px solid rgba(180,50,50,0.25);border-radius:8px;padding:5px 13px;color:rgba(255,140,140,0.65);font-size:0.76rem">🗑 Remove</button>`).join('')}
+  `;
+}
+
+// ════════════════════════════════════════════════════════
+// ACTIONS
+// ════════════════════════════════════════════════════════
+function switchTab(t) { S.tab=t; S.home.showHistory=false; render(); window.scrollTo(0,0); }
+function toggleEmotion(k) { S.home.emotion=S.home.emotion===k?'':k; render(); }
+function useHist(i) { S.home.query=HIST.all()[i]; S.home.showHistory=false; doSearch(); }
+function quickHadith(t) { S.hadith.query=t; render(); doHadith(); }
+
+function tapDhikr() {
+  const d=S.dhikr; const sel=DHIKR_LIST[d.idx];
+  d.count++;
+  if (d.count===sel.count) setTimeout(()=>alert(`MashaAllah! 🎉\n${sel.count} × ${sel.tr} completed!\n\n${sel.reward}`),100);
+  const today=new Date().toDateString(); const key=`${today}_${sel.tr}`;
+  d.sessions[key]=(d.sessions[key]||0)+1;
+  localStorage.setItem('noor_dhikr',JSON.stringify(d.sessions));
+  render();
+}
+
+function toggleBM(a) {
+  if (BM.has(a.s,a.a)) BM.rem(a.s,a.a); else BM.add(a);
+  render();
+}
+
+let currentAudio = null;
+function playAudio(s,a,btn) {
+  if (currentAudio) { currentAudio.pause(); currentAudio=null; document.querySelectorAll('.audio-playing').forEach(b=>{b.textContent='▶ Play';b.classList.remove('audio-playing');}); }
+  const url=`https://cdn.islamic.network/quran/audio/128/ar.alafasy/${String(s).padStart(3,'0')}${String(a).padStart(3,'0')}.mp3`;
+  currentAudio=new Audio(url);
+  btn.textContent='⏹ Stop'; btn.classList.add('audio-playing');
+  currentAudio.onended=()=>{btn.textContent='▶ Play';btn.classList.remove('audio-playing');currentAudio=null;};
+  currentAudio.onerror=()=>{btn.textContent='▶ Play';btn.classList.remove('audio-playing');currentAudio=null;};
+  currentAudio.play().catch(()=>{btn.textContent='▶ Play';});
+}
+
+function shareAyat(a) {
+  const url=shareCard(a);
+  const link=document.createElement('a'); link.href=url; link.download=`noor-${a.s}-${a.a}.png`; link.click();
+}
+
+function changeKey() {
+  const cur=localStorage.getItem('noor_gemini_key');
+  const k=prompt(`Gemini API Key\n\nGet FREE key at: aistudio.google.com\n\nCurrent: ${cur?'****'+cur.slice(-4):'Not set'}\n\nPaste new key:`);
+  if (k&&k.length>10) { localStorage.setItem('noor_gemini_key',k.trim()); alert('✅ Key saved!'); }
+}
+
+// Daily Ayat
+let dailyLoaded = false;
+function openDaily() {
+  document.getElementById('dailyModal').style.display = 'flex';
+  var today = new Date().toDateString();
+  var cacheOk = false;
+  try {
+    var start = new Date(new Date().getFullYear(), 0, 0);
+    var dy = Math.floor((new Date() - start) / 86400000);
+    var poolIdx = dy % DAILY_POOL.length;
+    var c = JSON.parse(localStorage.getItem('noor_daily') || 'null');
+    if (c && c.date === today && c.idx === poolIdx && c.ayat && c.ayat.ar) cacheOk = true;
+  } catch(e) {}
+  if (!cacheOk) {
+    dailyLoaded = false;
+    document.getElementById('dailyContent').innerHTML = '<div class="loader"><div class="spinner spin"></div><div class="loader-text">Loading today's verse...</div></div>';
+  }
+  if (!dailyLoaded) loadDaily();
+}
+function closeDaily() { document.getElementById('dailyModal').style.display='none'; }
+
+async function loadDaily() {
+  var today = new Date().toDateString();
+  var start = new Date(new Date().getFullYear(), 0, 0);
+  var dy = Math.floor((new Date() - start) / 86400000);
+  var poolIdx = dy % DAILY_POOL.length;
+  var offline = DAILY_POOL[poolIdx];
+  // Check cache - use only if same day and same pool index
+  try {
+    var c = JSON.parse(localStorage.getItem('noor_daily') || 'null');
+    if (c && c.date === today && c.idx === poolIdx && c.ayat && c.ayat.ar) {
+      showDaily(c.ayat); return;
+    }
+  } catch(e) {}
+  // Show offline ayat instantly
+  showDaily(offline);
+  localStorage.setItem('noor_daily', JSON.stringify({date:today, idx:poolIdx, ayat:offline}));
+  dailyLoaded = true;
+  // Try AI for personalized verse silently
+  if (getKey()) {
+    try {
+      var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      var dayName = days[new Date().getDay()];
+      var raw = await ai(
+        'Return ONLY a valid JSON object. No markdown, no extra text. Required keys: sn (surah name in English), sa (Arabic surah name), s (surah number as integer), a (ayat number as integer), ar (complete Arabic verse), ur (Urdu translation), en (English translation), tf (2 inspiring sentences of tafseer).',
+        'Give me one beautiful uplifting Quran verse suited for ' + dayName + '. Make it comforting and deeply meaningful.'
+      );
+      var p = safeJSON(raw, 'obj');
+      if (p && p.ar && p.en && p.s) {
+        localStorage.setItem('noor_daily', JSON.stringify({date:today, idx:poolIdx, ayat:p}));
+        showDaily(p);
+      }
+    } catch(e) { console.log('Daily AI skipped:', e.message); }
+  }
+}
+
+function showDaily(a) {
+  dailyLoaded=true;
+  document.getElementById('dailyContent').innerHTML = a ? ayatCard(a) : '<div class="error-box">Could not load. Try again.</div>';
+}
+
+// ════════════════════════════════════════════════════════
+// API ACTIONS
+// ════════════════════════════════════════════════════════
+async function doSearch() {
+  const h=S.home;
+  if (!h.query.trim()&&!h.emotion) return;
+  h.loading=true; h.error=''; h.results=null; h.showHistory=false;
+  if (h.query.trim()) HIST.add(h.query.trim());
+  // Show offline results instantly
+  h.results=getAyat(h.emotion,h.query);
+  h.loading=false;
+  render();
+  // Try AI silently
+  if (getKey()) {
+    try {
+      const prompt=h.emotion&&h.query?`Feeling ${h.emotion}, asking: "${h.query}"`:h.emotion?`Feeling ${h.emotion}`:`Topic: "${h.query}"`;
+      const raw=await ai('Return ONLY a JSON array of exactly 2 objects. Each has: sn (surah name string), sa (Arabic surah name string), s (surah number int), a (ayat number int), ar (Arabic text), ur (Urdu translation), en (English translation), tf (2 sentence tafseer), rl (1 sentence relevance). No markdown, no extra text.',prompt);
+      const p=safeJSON(raw,'arr');
+      if(p&&p.length){S.home.results=p;render();}
+    } catch(e){console.log('AI search failed:',e.message);}
+  }
+}
+
+async function doHadith() {
+  const h=S.hadith;
+  h.loading=true; h.error=''; h.results=null;
+  h.results=searchHadith(h.query);
+  h.loading=false;
+  render();
+  if (getKey()&&h.query) {
+    try {
+      const raw=await ai('Return ONLY a JSON array of exactly 2 hadith objects. Each has: n (narrator string), b (book string), ba (Arabic book name), num (hadith number string), ar (Arabic text), en (English translation), ur (Urdu translation), ex (2 sentence explanation), g (grade: Sahih/Hasan). No markdown.',`Find Hadith about: "${h.query}"`);
+      const p=safeJSON(raw,'arr');
+      if(p&&p.length){S.hadith.results=p;render();}
+    } catch(e){console.log('Hadith AI failed:',e.message);}
+  }
+}
+
+async function fetchPrayer() {
+  const p=S.prayer;
+  if (!p.input.trim()) return;
+  p.loading=true; p.error=''; render();
+  try {
+    const d=new Date();
+    const r=await fetch(`https://api.aladhan.com/v1/timingsByCity?city=${encodeURIComponent(p.input)}&country=PK&method=1&date=${d.getDate()}-${d.getMonth()+1}-${d.getFullYear()}`);
+    const data=await r.json();
+    if(data.code!==200) throw new Error('City not found');
+    const t=data.data.timings;
+    p.times={Fajr:t.Fajr,Sunrise:t.Sunrise,Dhuhr:t.Dhuhr,Asr:t.Asr,Maghrib:t.Maghrib,Isha:t.Isha};
+    p.city=p.input;
+  } catch { p.error='City not found. Try: Karachi, Lahore, Islamabad'; }
+  p.loading=false; render();
+}
+
+// ════════════════════════════════════════════════════════
+// CLOCK
+// ════════════════════════════════════════════════════════
+setInterval(()=>{
+  S.prayer.now=new Date();
+  if(S.tab==='prayer'){
+    const cl=document.getElementById('clock');
+    if(cl) cl.textContent=S.prayer.now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  }
+},1000);
+
+// ════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════
+function initApp() { render(); }
+</script>
+</body>
+</html>
