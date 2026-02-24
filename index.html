@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<!-- NOOR v6.0 — BUILT-IN QURAN + HADITH DATABASE — ZERO API DEPENDENCY -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#071818">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Noor">
+<title>Noor — نور</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌙</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --gold:#c9a84c;--gold2:#a8722a;--gs:rgba(201,168,76,0.13);
+  --bg:#071818;--bg2:#0a2020;--text:rgba(253,246,227,0.9);
+  --text2:rgba(253,246,227,0.55);--text3:rgba(253,246,227,0.25);
+  --border:rgba(201,168,76,0.2);--border2:rgba(201,168,76,0.1);
+  --card:rgba(255,255,255,0.04);--r:16px;
+  --green:rgba(50,180,80,0.8);--green-bg:rgba(50,180,80,0.1);--green-border:rgba(50,180,80,0.25);
+}
+body{font-family:Inter,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overscroll-behavior:none}
+::-webkit-scrollbar{width:0}
+button{cursor:pointer;font-family:Inter,sans-serif}
+input,textarea{font-family:Inter,sans-serif;outline:none;-webkit-appearance:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 18px rgba(201,168,76,0.35)}50%{box-shadow:0 0 32px rgba(201,168,76,0.65)}}
+@keyframes glow{0%,100%{opacity:.4}50%{opacity:1}}
+.fade{animation:fadeUp .3s ease both}
+
+/* ONBOARDING */
+#ob{position:fixed;inset:0;background:linear-gradient(160deg,#030e0e,#071818,#040f0f);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 20px;z-index:999}
+.ob-wrap{max-width:380px;width:100%;text-align:center}
+.ob-icon{font-size:5rem;filter:drop-shadow(0 0 28px rgba(201,168,76,.9));margin-bottom:18px;animation:glow 3s ease infinite}
+.ob-title{font-family:Amiri,serif;font-size:2rem;color:var(--gold);margin-bottom:5px}
+.ob-ar{font-family:Amiri,serif;font-size:1.2rem;color:rgba(201,168,76,.3);margin-bottom:18px}
+.ob-desc{font-size:.9rem;color:var(--text2);line-height:1.85;margin-bottom:26px}
+.ob-dots{display:flex;justify-content:center;gap:7px;margin-bottom:24px}
+.ob-dot{height:7px;border-radius:4px;background:rgba(201,168,76,.2);transition:all .3s}
+.ob-btn{width:100%;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;
+  border-radius:14px;padding:14px;color:#1a1208;font-weight:700;font-size:.95rem}
+.ob-back{background:none;border:none;color:rgba(201,168,76,.3);font-size:.8rem;margin-top:10px;padding:7px}
+.ob-skip{background:none;border:none;color:var(--text3);font-size:.72rem;margin-top:4px;padding:5px}
+
+/* APP */
+#app{display:none;flex-direction:column;min-height:100vh}
+#app.show{display:flex}
+.header{padding:max(16px,env(safe-area-inset-top)) 14px 10px;
+  background:rgba(7,24,24,.96);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border2);position:sticky;top:0;z-index:100}
+.h-row{display:flex;align-items:center;justify-content:space-between}
+.h-logo{display:flex;align-items:center;gap:9px}
+.h-moon{font-size:1.5rem;filter:drop-shadow(0 0 10px rgba(201,168,76,.7))}
+.h-name{font-family:Amiri,serif;font-size:1.75rem;color:var(--gold);letter-spacing:3px;font-style:italic}
+.h-ar{font-family:Amiri,serif;font-size:1.15rem;color:rgba(201,168,76,.3)}
+.h-sub{font-size:.52rem;color:var(--text3);letter-spacing:2.5px;text-transform:uppercase;margin-top:3px;text-align:center}
+.hbtn{background:var(--gs);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:.65rem;color:rgba(201,168,76,.6)}
+
+.content{flex:1;overflow-y:auto;padding:13px 12px 86px;max-width:760px;margin:0 auto;width:100%}
+
+/* NAV */
+.nav{position:fixed;bottom:0;left:0;right:0;background:rgba(4,14,14,.98);
+  border-top:1px solid var(--border2);backdrop-filter:blur(18px);
+  display:flex;justify-content:space-around;
+  padding:6px 0 max(10px,env(safe-area-inset-bottom));z-index:100}
+.nb{background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 7px}
+.nb-icon{font-size:1.18rem;transition:filter .2s}
+.nb.active .nb-icon{filter:drop-shadow(0 0 8px rgba(201,168,76,.9))}
+.nb-label{font-size:.54rem;color:var(--text3)}
+.nb.active .nb-label{color:var(--gold)}
+.nb-dot{width:4px;height:4px;border-radius:50%;background:transparent;margin-top:1px}
+.nb.active .nb-dot{background:var(--gold)}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:13px}
+.sl{font-size:.6rem;text-transform:uppercase;letter-spacing:2.5px;color:var(--gold);font-weight:700}
+.ch{background:linear-gradient(135deg,rgba(201,168,76,.1),transparent);
+  border-bottom:1px solid var(--border2);padding:10px 15px;margin:-16px -16px 15px;
+  border-radius:var(--r) var(--r) 0 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:7px}
+
+/* INPUTS */
+textarea,input[type=text]{background:rgba(255,255,255,.05);border:1.5px solid rgba(201,168,76,.22);
+  border-radius:12px;padding:10px 13px;color:var(--text);width:100%;font-size:.9rem;transition:border-color .2s}
+textarea:focus,input[type=text]:focus{border-color:var(--gold)}
+.sbtn{width:100%;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;
+  border-radius:12px;padding:12px;color:#1a1208;font-weight:700;font-size:.88rem;margin-top:10px;transition:opacity .2s}
+
+/* EMOTIONS */
+.egrid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;justify-content:center}
+.ebtn{background:var(--gs);border:1.5px solid var(--border);color:var(--text2);
+  padding:5px 12px;border-radius:50px;font-size:.75rem;transition:all .2s}
+.ebtn.on{background:rgba(201,168,76,.2);border-color:var(--gold);color:var(--gold)}
+
+/* AYAT CARD */
+.acard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:14px;animation:fadeUp .3s ease both}
+.a-meta{background:linear-gradient(135deg,rgba(201,168,76,.11),transparent);
+  border-bottom:1px solid var(--border2);padding:9px 14px;
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:7px}
+.a-ref{font-size:.8rem;color:#e8c97a;font-weight:600}
+.a-btns{display:flex;gap:4px}
+.abtn{background:var(--gs);border:1px solid var(--border);border-radius:6px;padding:3px 8px;color:rgba(201,168,76,.7);font-size:.7rem;transition:all .15s}
+.abtn.on,.abtn:active{background:rgba(201,168,76,.22);color:#e8c97a}
+.a-ar{font-family:Amiri,serif;font-size:1.75rem;line-height:2;text-align:right;direction:rtl;
+  padding:15px;border-bottom:1px solid var(--border2);background:rgba(201,168,76,.02)}
+.a-tr{padding:12px 14px;display:grid;gap:10px}
+.tr-row{display:flex;gap:9px;align-items:flex-start}
+.lb{min-width:28px;height:28px;background:var(--gs);border:1px solid var(--border);
+  border-radius:6px;display:flex;align-items:center;justify-content:center;
+  font-size:.56rem;font-weight:800;color:var(--gold);flex-shrink:0}
+.lbl{font-size:.54rem;text-transform:uppercase;letter-spacing:2px;color:rgba(201,168,76,.35);margin-bottom:2px}
+.ar-t{font-family:Amiri,serif;direction:rtl;text-align:right;font-size:1rem;line-height:2;color:var(--text2)}
+.en-t{font-size:.88rem;line-height:1.72;color:var(--text2)}
+.a-ins{background:linear-gradient(135deg,rgba(8,24,24,.9),rgba(6,18,18,.9));
+  border-top:1px solid var(--border2);padding:12px 14px}
+.ins-t{font-size:.84rem;line-height:1.8;color:var(--text2)}
+.rel-box{margin-top:8px;padding:8px 11px;background:var(--gs);border-radius:7px;
+  border-left:3px solid var(--gold);font-size:.79rem;color:rgba(201,168,76,.8);font-style:italic}
+
+/* HADITH CARD */
+.hcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:14px;animation:fadeUp .3s ease both}
+.gbadge{background:var(--green-bg);border:1px solid var(--green-border);
+  border-radius:50px;padding:2px 9px;font-size:.62rem;color:var(--green);font-weight:700}
+.h-ar{font-family:Amiri,serif;font-size:1.45rem;line-height:1.9;text-align:right;
+  direction:rtl;padding:14px;border-bottom:1px solid var(--border2)}
+.h-body{padding:12px 14px;display:grid;gap:10px}
+.h-exp{background:rgba(10,28,28,.6);border-top:1px solid var(--border2);padding:11px 14px}
+
+/* TOPICS */
+.topics{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
+.tpill{background:var(--gs);border:1px solid var(--border);border-radius:50px;
+  padding:4px 11px;color:rgba(201,168,76,.7);font-size:.7rem;cursor:pointer;transition:all .2s}
+.tpill:active{background:rgba(201,168,76,.18);color:var(--gold)}
+
+/* NAMES */
+.ngrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(126px,1fr));gap:7px;margin-top:12px}
+.ncard{background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:11px 8px;text-align:center;cursor:pointer;transition:border-color .2s}
+.ncard:hover{border-color:var(--gold)}
+.n-detail{background:rgba(201,168,76,.06);border:1px solid var(--gold);border-radius:var(--r);
+  padding:20px;text-align:center;margin-bottom:12px;animation:fadeUp .3s ease both}
+
+/* PRAYER */
+.pr-row{display:flex;justify-content:space-between;align-items:center;padding:9px 13px;border-radius:9px;margin-bottom:5px}
+.pr-next{background:rgba(201,168,76,.1);border:1px solid var(--border)}
+.pr-rest{background:rgba(255,255,255,.02);border:1px solid var(--border2)}
+
+/* DHIKR */
+.ditem{background:var(--card);border:1.5px solid var(--border2);border-radius:10px;
+  padding:8px 12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:all .2s;margin-bottom:6px}
+.ditem.on{background:rgba(201,168,76,.1);border-color:var(--gold)}
+.dtap{width:115px;height:115px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#8a5e20);
+  border:4px solid rgba(201,168,76,.4);font-size:2rem;display:flex;align-items:center;justify-content:center;
+  margin:0 auto 14px;transition:transform .1s;animation:pulse 2.5s ease-in-out infinite}
+.dtap:active{transform:scale(.9)}
+
+/* SEARCH RESULT COUNT */
+.res-tag{display:flex;align-items:center;gap:6px;padding:6px 11px;border-radius:8px;
+  font-size:.67rem;margin-bottom:10px;background:var(--green-bg);border:1px solid var(--green-border)}
+.res-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
+
+/* EMPTY */
+.empty{text-align:center;padding:55px 14px;color:var(--text3)}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(3,12,12,.94);z-index:300;
+  display:flex;align-items:center;justify-content:center;padding:14px;backdrop-filter:blur(10px)}
+.mbox{background:linear-gradient(160deg,#0c2222,#0a2e2e);border:1px solid rgba(201,168,76,.28);
+  border-radius:20px;padding:18px;max-width:580px;width:100%;max-height:85vh;overflow-y:auto}
+
+/* FLOAT */
+.float{position:fixed;bottom:78px;right:14px;z-index:200;display:flex;flex-direction:column;align-items:center;gap:3px}
+.fbtn{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));
+  border:2px solid rgba(201,168,76,.5);font-size:1.2rem;display:flex;align-items:center;justify-content:center;
+  animation:pulse 2.5s ease-in-out infinite}
+.flabel{font-size:.46rem;color:rgba(201,168,76,.5)}
+
+/* INSTALL BANNER */
+#install-banner{position:fixed;bottom:0;left:0;right:0;z-index:9999;
+  background:linear-gradient(135deg,#0d2c2c,#0a2020);border-top:2px solid rgba(201,168,76,.5);
+  padding:13px 15px max(13px,env(safe-area-inset-bottom)) 15px;
+  display:none;flex-direction:column;gap:9px;box-shadow:0 -8px 32px rgba(0,0,0,.6)}
+#install-banner.show{display:flex}
+.ib-top{display:flex;align-items:center;gap:11px}
+.ib-dismiss{background:none;border:none;color:rgba(201,168,76,.3);font-size:1.1rem;padding:3px;align-self:flex-start}
+.ib-btns{display:flex;gap:8px}
+.ib-install{flex:1;background:linear-gradient(135deg,#c9a84c,#a8722a);border:none;
+  border-radius:11px;padding:11px;color:#1a1208;font-weight:700;font-size:.87rem}
+.ib-later{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);
+  border-radius:11px;padding:11px 14px;color:rgba(201,168,76,.6);font-size:.83rem}
+#ios-guide{position:fixed;inset:0;z-index:10000;background:rgba(4,14,14,.95);
+  display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(10px)}
+#ios-guide.show{display:flex}
+.ig-box{background:linear-gradient(160deg,#0d2424,#0a3030);border:1px solid rgba(201,168,76,.32);
+  border-radius:22px 22px 0 0;padding:22px 18px max(22px,env(safe-area-inset-bottom)) 18px;width:100%;max-width:480px}
+.ig-step{display:flex;align-items:flex-start;gap:13px;margin-bottom:16px}
+.ig-num{min-width:30px;height:30px;border-radius:50%;background:rgba(201,168,76,.15);
+  border:1px solid rgba(201,168,76,.3);display:flex;align-items:center;justify-content:center;
+  font-size:.78rem;font-weight:700;color:#e8c97a;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<!-- ONBOARDING -->
+<div id="ob">
+  <div class="ob-wrap">
+    <div class="ob-icon" id="ob-icon">🌙</div>
+    <div class="ob-title" id="ob-title">Noor — Your Islamic Companion</div>
+    <div class="ob-ar" id="ob-ar">نور — رفيقك الإسلامي</div>
+    <div class="ob-desc" id="ob-desc">Search the Quran and authentic Hadith by emotion or keyword — all built in, instant, no internet needed.</div>
+    <div class="ob-dots" id="ob-dots"></div>
+    <button class="ob-btn" id="ob-next">Next →</button>
+    <div><button class="ob-back" id="ob-back">← Back</button></div>
+    <div><button class="ob-skip" id="ob-skip">Skip intro</button></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="header">
+    <div class="h-row">
+      <div class="h-logo">
+        <span class="h-moon">🌙</span>
+        <span class="h-name">Noor</span>
+        <span class="h-ar">نور</span>
+      </div>
+      <button class="hbtn" id="settings-btn">⚙️ Settings</button>
+    </div>
+    <div class="h-sub">Quran · Hadith · Prayer · Dhikr — All Built In</div>
+  </div>
+  <div class="content" id="content"></div>
+  <div class="nav" id="nav"></div>
+  <div class="float">
+    <button class="fbtn" id="daily-btn">🌅</button>
+    <span class="flabel">Daily Ayat</span>
+  </div>
+  <div class="overlay" id="daily-modal" style="display:none">
+    <div class="mbox">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <span class="sl">🌅 Today&#39;s Ayat</span>
+        <button id="daily-close" style="background:var(--gs);border:1px solid var(--border);border-radius:7px;padding:3px 11px;color:rgba(201,168,76,.6);font-size:.76rem">✕ Close</button>
+      </div>
+      <div id="daily-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PWA INSTALL -->
+<div id="install-banner">
+  <div class="ib-top">
+    <span style="font-size:2.1rem;filter:drop-shadow(0 0 12px rgba(201,168,76,.8))">🌙</span>
+    <div style="flex:1">
+      <div style="font-size:.95rem;font-weight:700;color:#e8c97a;font-family:Amiri,serif">Install Noor App</div>
+      <div style="font-size:.73rem;color:var(--text2);margin-top:1px">Add to home screen — works 100% offline!</div>
+    </div>
+    <button class="ib-dismiss" id="ib-dismiss">✕</button>
+  </div>
+  <div class="ib-btns">
+    <button class="ib-install" id="ib-install">📲 Install Free</button>
+    <button class="ib-later" id="ib-later">Later</button>
+  </div>
+</div>
+<div id="ios-guide">
+  <div class="ig-box">
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="font-size:2rem;margin-bottom:5px">🌙</div>
+      <div style="font-family:Amiri,serif;font-size:1.35rem;color:#e8c97a">Install Noor</div>
+      <div style="font-size:.76rem;color:var(--text3);margin-top:3px">3 steps to add to your home screen</div>
+    </div>
+    <div class="ig-step"><div class="ig-num">1</div><div style="font-size:.86rem;color:var(--text2);line-height:1.6">Tap the <strong style="color:#e8c97a">Share button ⬆️</strong> at the bottom of Safari</div></div>
+    <div class="ig-step"><div class="ig-num">2</div><div style="font-size:.86rem;color:var(--text2);line-height:1.6">Tap <strong style="color:#e8c97a">Add to Home Screen ➕</strong></div></div>
+    <div class="ig-step"><div class="ig-num">3</div><div style="font-size:.86rem;color:var(--text2);line-height:1.6">Tap <strong style="color:#e8c97a">Add</strong> — Noor is on your home screen!</div></div>
+    <button id="ios-close" style="width:100%;background:linear-gradient(135deg,#c9a84c,#a8722a);border:none;border-radius:11px;padding:12px;color:#1a1208;font-weight:700;font-size:.88rem;margin-top:5px">Got it ✓</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════
+// NOOR v6.0 — COMPLETE BUILT-IN DATABASE
+// No API calls. No rate limits. No errors. Works offline forever.
+// ═══════════════════════════════════════════════════════════════════════
+
+// ── QURAN DATABASE ─────────────────────────────────────────────────────
+// Format: [surah, ayah, arabic, urdu, english, topics[], keywords[]]
+var AYAT = [[94,5,"إِنَّ مَعَ الْعُسْرِ يُسْرًا","بے شک تکلیف کے ساتھ آسانی ہے","For indeed, with hardship will be ease.",["sadness","grief","hardship","hope"],["sad","grief","pain","difficulty","hard","ease","relief","crying"]],[94,6,"إِنَّ مَعَ الْعُسْرِ يُسْرًا","یقیناً مشکل کے ساتھ آسانی ہے","Indeed, with hardship will be ease.",["sadness","grief","hardship","hope"],["sad","grief","hard","pain","difficulty","relief","ease","struggle"]],[2,286,"لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا","اللہ کسی جان کو اس کی طاقت سے بڑھ کر تکلیف نہیں دیتا","Allah does not burden a soul beyond that it can bear.",["sadness","hardship","grief","anxiety"],["burden","capacity","bear","strength","overwhelmed","too much","cant cope","breaking"]],[93,3,"مَا وَدَّعَكَ رَبُّكَ وَمَا قَلَىٰ","تیرے رب نے نہ تجھے چھوڑا اور نہ ناراض ہوا","Your Lord has not taken leave of you, nor has He detested you.",["sadness","grief","abandoned","hope"],["alone","abandoned","forgotten","left","forsaken","God left","allah left"]],[93,4,"وَلَلْآخِرَةُ خَيْرٌ لَّكَ مِنَ الْأُولَىٰ","اور آخرت تیرے لیے دنیا سے بہتر ہے","And the Hereafter is better for you than the first life.",["sadness","grief","hope","afterlife"],["better","future","hereafter","this world","dunia","hope","tomorrow"]],[39,53,"لَا تَقْنَطُوا مِن رَّحْمَةِ اللَّهِ","اللہ کی رحمت سے مایوس نہ ہو","Do not despair of the mercy of Allah.",["sadness","hopelessness","repentance","hope"],["despair","hopeless","give up","no hope","mercy","rahma","forgive","lost hope"]],[12,86,"إِنَّمَا أَشْكُو بَثِّي وَحُزْنِي إِلَى اللَّهِ","میں اپنا دکھ اور غم صرف اللہ سے بیان کرتا ہوں","I only complain of my suffering and my grief to Allah.",["sadness","grief","crying","dua"],["cry","weep","complain","grief","sorrow","telling allah","pour heart","vent"]],[2,155,"وَبَشِّرِ الصَّابِرِينَ","اور صبر کرنے والوں کو خوشخبری دے دو","And give good tidings to the patient.",["sadness","patience","grief"],["patient","sabr","patience","glad tidings","reward","endure"]],[3,139,"وَلَا تَهِنُوا وَلَا تَحْزَنُوا","نہ کمزور پڑو اور نہ غمگین ہو","Do not weaken and do not grieve.",["sadness","grief","courage"],["weak","sad","grief","grieve","sorrow","dont give up","strong"]],[21,83,"أَنِّي مَسَّنِيَ الضُّرُّ وَأَنتَ أَرْحَمُ الرَّاحِمِينَ","مجھے تکلیف پہنچی ہے اور تو سب سے بڑا رحم کرنے والا ہے","Indeed, adversity has touched me, and you are the Most Merciful.",["sadness","illness","dua","grief"],["pain","suffering","mercy","most merciful","touched","harm","ailing","sick","hurt"]],[7,156,"وَرَحْمَتِي وَسِعَتْ كُلَّ شَيْءٍ","میری رحمت ہر چیز کو گھیرے ہوئے ہے","My mercy encompasses all things.",["sadness","mercy","hope","grief"],["mercy","encompasses","everything","rahma","hope","all things","vast"]],[13,28,"أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ","سن لو، اللہ کے ذکر سے دلوں کو سکون ملتا ہے","Verily, in the remembrance of Allah do hearts find rest.",["anxiety","peace","dhikr","worry"],["anxious","anxiety","worry","stressed","peace","calm","heart","rest","tranquil","remember allah"]],[2,45,"وَاسْتَعِينُوا بِالصَّبْرِ وَالصَّلَاةِ","صبر اور نماز کے ذریعے مدد مانگو","Seek help through patience and prayer.",["anxiety","prayer","patience","worry"],["help","prayer","patience","seek","salah","namaz","struggle","overwhelmed"]],[9,51,"قُل لَّن يُصِيبَنَا إِلَّا مَا كَتَبَ اللَّهُ لَنَا","کہہ دو: ہمیں وہی پہنچے گا جو اللہ نے ہمارے لیے لکھ دیا ہے","Say: Never will we be struck except by what Allah has decreed for us.",["anxiety","trust","destiny","fear","worry"],["fear","worry","destiny","decree","written","qadar","tawaqqal","trust"]],[65,3,"وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ","اور جو اللہ پر توکل کرے تو وہ اسے کافی ہے","And whoever relies upon Allah — then He is sufficient for him.",["anxiety","trust","reliance","worry"],["rely","trust","sufficient","enough","tawakkul","depend","allah enough"]],[3,173,"حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ","ہمیں اللہ کافی ہے اور وہ بہترین کارساز ہے","Sufficient for us is Allah, and He is the best Disposer of affairs.",["anxiety","trust","fear","worry"],["sufficient","enough","best","disposer","hasbunallah","stress","overwhelmed","afraid"]],[28,7,"إِنَّا رَادُّوهُ إِلَيْكِ","بے شک ہم اسے تجھ سے واپس ملا دیں گے","Indeed, We will return him to you.",["anxiety","mother","trust","hope"],["return","reunite","separated","lost someone","hope","promise"]],[16,97,"مَنْ عَمِلَ صَالِحًا مِّن ذَكَرٍ أَوْ أُنثَىٰ وَهُوَ مُؤْمِنٌ فَلَنُحْيِيَنَّهُ حَيَاةً طَيِّبَةً","جو نیک عمل کرے، اسے ہم پاکیزہ زندگی عطا کریں گے","Whoever does righteousness, We will surely cause him to live a good life.",["anxiety","hope","good deeds","peace"],["good life","righteous","peace","reward","worthy","blessed life"]],[14,7,"لَئِن شَكَرْتُمْ لَأَزِيدَنَّكُمْ","اگر تم شکر کرو گے تو میں تمہیں اور زیادہ دوں گا","If you are grateful, I will surely increase you in favor.",["gratitude","blessings","increase"],["grateful","gratitude","thankful","shukr","increase","more","blessings","favor","abundance"]],[55,13,"فَبِأَيِّ آلَاءِ رَبِّكُمَا تُكَذِّبَانِ","پس تم اپنے رب کی کس کس نعمت کو جھٹلاؤ گے","So which of the favors of your Lord would you deny?",["gratitude","blessings","reflection"],["blessings","favor","deny","grateful","gifts","nirmat","which blessings"]],[2,152,"فَاذْكُرُونِي أَذْكُرْكُمْ","پس تم مجھے یاد کرو، میں تمہیں یاد کروں گا","So remember Me; I will remember you.",["gratitude","dhikr","connection"],["remember","dhikr","grateful","connection","allah remembers","reciprocal"]],[16,18,"وَإِن تَعُدُّوا نِعْمَةَ اللَّهِ لَا تُحْصُوهَا","اور اگر تم اللہ کی نعمتیں گنو تو انہیں شمار نہیں کر سکتے","And if you should count the favor of Allah, you could not enumerate them.",["gratitude","blessings"],["count","blessings","enumerate","countless","many","numerable","gifts"]],[31,12,"وَمَن يَشْكُرْ فَإِنَّمَا يَشْكُرُ لِنَفْسِهِ","جو شکر کرے وہ اپنے ہی فائدے کے لیے شکر کرتا ہے","And whoever is grateful — he is only grateful for the benefit of himself.",["gratitude","wisdom"],["grateful","benefit","yourself","shukr","gratitude for yourself","self benefit"]],[93,11,"وَأَمَّا بِنِعْمَةِ رَبِّكَ فَحَدِّثْ","اور اپنے رب کی نعمتوں کا تذکرہ کرتے رہو","But as for the favor of your Lord, report it.",["gratitude","blessings","speech"],["report","speak","mention","gratitude","blessings","tell","share"]],[1,6,"اهدِنَا الصِّرَاطَ المُستَقِيمَ","ہمیں سیدھے راستے پر چلا","Guide us to the straight path.",["guidance","lost","prayer"],["guide","guidance","straight","path","sirat","lost","direction","right way"]],[2,2,"ذَٰلِكَ الْكِتَابُ لَا رَيْبَ فِيهِ هُدًى لِّلْمُتَّقِينَ","یہ وہ کتاب ہے جس میں کوئی شک نہیں، ہدایت ہے متقیوں کے لیے","This is the Book about which there is no doubt, a guidance for those conscious of Allah.",["guidance","quran","knowledge"],["book","guidance","doubt","quran","hidaya","led","guidance book"]],[17,9,"إِنَّ هَٰذَا الْقُرْآنَ يَهْدِي لِلَّتِي هِيَ أَقْوَمُ","یہ قرآن اس راستے کی طرف رہنمائی کرتا ہے جو سب سے سیدھا ہے","Indeed, this Quran guides to that which is most suitable.",["guidance","quran"],["quran","guide","most suitable","straight","right","hidaya"]],[39,17,"فَبَشِّرْ عِبَادِ الَّذِينَ يَسْتَمِعُونَ الْقَوْلَ فَيَتَّبِعُونَ أَحْسَنَهُ","خوشخبری دے اُن بندوں کو جو بات سنتے ہیں پھر اس کے بہترین پہلو کی پیروی کرتے ہیں","Give good tidings to those who listen to speech and follow the best of it.",["guidance","wisdom","knowledge"],["listen","follow","best","guidance","wisdom","speech","words"]],[18,10,"رَبَّنَا آتِنَا مِن لَّدُنكَ رَحْمَةً وَهَيِّئْ لَنَا مِنْ أَمْرِنَا رَشَدًا","اے ہمارے رب! ہمیں اپنے پاس سے رحمت عطا فرما اور ہمارے کام میں سیدھی راہ پیدا کر دے","Our Lord, grant us from Yourself mercy and prepare for us from our affair right guidance.",["guidance","dua","mercy"],["guidance","mercy","right","prepare","dua","lost","direction","lord grant"]],[20,114,"رَّبِّ زِدْنِي عِلْمًا","اے میرے رب! میرے علم میں اضافہ فرما","My Lord, increase me in knowledge.",["guidance","knowledge","dua"],["knowledge","increase","ilm","learn","study","understand","wisdom","grow"]],[12,87,"لَا تَيْأَسُوا مِن رَّوْحِ اللَّهِ","اللہ کی رحمت سے مایوس نہ ہو","And do not despair of relief from Allah.",["hope","despair","mercy"],["hope","despair","give up","mercy","relief","rohallah","never hopeless","hopeful"]],[9,40,"إِنَّ اللَّهَ مَعَنَا","بے شک اللہ ہمارے ساتھ ہے","Indeed, Allah is with us.",["fear","courage","trust"],["allah with us","fear","afraid","courage","protect","with me","not alone","god with"]],[5,11,"وَعَلَى اللَّهِ فَلْيَتَوَكَّلِ الْمُؤْمِنُونَ","اور مومنوں کو اللہ ہی پر بھروسہ رکھنا چاہیے","And upon Allah let the believers rely.",["fear","trust","faith"],["trust","rely","believers","faith","tawakkul","lean","depend"]],[8,46,"وَاصْبِرُوا ۚ إِنَّ اللَّهَ مَعَ الصَّابِرِينَ","صبر کرو، بے شک اللہ صبر کرنے والوں کے ساتھ ہے","And be patient. Indeed, Allah is with the patient.",["fear","patience","courage"],["patient","fear","courage","allah with","patience","steadfast","hold on"]],[28,35,"لَا تَخَافَا ۖ إِنَّنِي مَعَكُمَا","مت ڈرو، بے شک میں تمہارے ساتھ ہوں","Fear not. Indeed, I am with you both.",["fear","courage","trust"],["fear not","dont fear","afraid","scared","with you","protected","courage","dont worry"]],[39,10,"إِنَّمَا يُوَفَّى الصَّابِرُونَ أَجْرَهُم بِغَيْرِ حِسَابٍ","صبر کرنے والوں کو ان کا اجر بے حساب دیا جائے گا","Indeed, the patient will be given their reward without account.",["patience","reward","hardship"],["patient","sabr","reward","without account","unlimited","patience rewarded"]],[2,153,"يَا أَيُّهَا الَّذِينَ آمَنُوا اسْتَعِينُوا بِالصَّبْرِ وَالصَّلَاةِ","اے ایمان والو! صبر اور نماز سے مدد لو","O you who believe, seek help through patience and prayer.",["patience","prayer","faith"],["patience","prayer","salah","namaz","help","believer","seek"]],[16,127,"وَاصْبِرْ وَمَا صَبْرُكَ إِلَّا بِاللَّهِ","اور صبر کر، اور تیرا صبر اللہ ہی کی توفیق سے ہے","And be patient, and your patience is not but through Allah.",["patience","trust","hardship"],["patient","patience","through allah","strength","sabr","endure","persevere"]],[3,200,"يَا أَيُّهَا الَّذِينَ آمَنُوا اصْبِرُوا وَصَابِرُوا","اے ایمان والو! صبر کرو اور ثابت قدم رہو","O you who believe, persevere and endure.",["patience","faith","courage"],["persevere","endure","steadfast","sabr","patience","stand firm","hold"]],[47,31,"وَلَنَبْلُوَنَّكُمْ حَتَّىٰ نَعْلَمَ الْمُجَاهِدِينَ مِنكُمْ وَالصَّابِرِينَ","ہم تمہیں ضرور آزمائیں گے یہاں تک کہ ہم ان لوگوں کو جان لیں جو مجاہد اور صابر ہیں","We will surely test you until We make evident those who strive and are patient.",["patience","trial","test"],["test","trial","patient","strive","evident","test patience","tribulation"]],[3,134,"وَالْكَاظِمِينَ الْغَيْظَ وَالْعَافِينَ عَنِ النَّاسِ","اور غصہ پینے والے اور لوگوں کو معاف کرنے والے","Those who restrain anger and who pardon the people.",["anger","forgiveness","self-control"],["anger","rage","restrain","control","pardon","forgive","swallow anger","mad","furious"]],[41,34,"ادْفَعْ بِالَّتِي هِيَ أَحْسَنُ","برائی کو اس چیز سے دور کرو جو بہتر ہو","Repel evil by that which is better.",["anger","forgiveness","response"],["repel","evil","better","respond","anger","react","good response","retaliate"]],[7,199,"خُذِ الْعَفْوَ وَأْمُرْ بِالْعُرْفِ وَأَعْرِضْ عَنِ الْجَاهِلِينَ","معافی کا رویہ اختیار کرو، نیکی کا حکم دو، اور جاہلوں سے منہ موڑ لو","Take what is given freely, enjoin what is good, and turn away from the ignorant.",["anger","forgiveness","wisdom"],["ignore","forgive","good","turn away","ignorant","jahil","anger","wisdom"]],[42,40,"وَجَزَاءُ سَيِّئَةٍ سَيِّئَةٌ مِّثْلُهَا فَمَنْ عَفَا وَأَصْلَحَ فَأَجْرُهُ عَلَى اللَّهِ","برائی کا بدلہ اسی جیسی برائی ہے، لیکن جو معاف کرے تو اس کا اجر اللہ کے ذمے ہے","The recompense of an evil act is one like it, but whoever pardons and reconciles — his reward is with Allah.",["anger","forgiveness","revenge"],["revenge","forgive","pardon","reward","evil","reconcile","anger","recompense"]],[2,156,"الَّذِينَ إِذَا أَصَابَتْهُم مُّصِيبَةٌ قَالُوا إِنَّا لِلَّهِ وَإِنَّا إِلَيْهِ رَاجِعُونَ","جب انہیں کوئی مصیبت پہنچتی ہے تو کہتے ہیں: ہم اللہ کے ہیں اور اللہ کی طرف لوٹنے والے ہیں","Who, when disaster strikes them, say: Indeed we belong to Allah, and indeed to Him we will return.",["heartbroken","loss","death","grief"],["loss","death","disaster","inna lillahi","return","belong to allah","musibah","bereavement","lost someone"]],[2,216,"وَعَسَىٰ أَن تَكْرَهُوا شَيْئًا وَهُوَ خَيْرٌ لَّكُمْ","ممکن ہے کہ تم کسی چیز کو ناپسند کرو اور وہ تمہارے لیے بہتر ہو","Perhaps you dislike a thing and it is good for you.",["heartbroken","loss","wisdom","hope"],["dislike","hate","good for you","blessing in disguise","perhaps","wisdom","heartbreak","rejection","breakup"]],[94,1,"أَلَمْ نَشْرَحْ لَكَ صَدْرَكَ","کیا ہم نے تیرا سینہ نہیں کھولا","Did We not expand for you your chest?",["heartbroken","relief","hope"],["chest","expand","open","relieve","burden lifted","heart","relief"]],[21,87,"لَّا إِلَٰهَ إِلَّا أَنتَ سُبْحَانَكَ إِنِّي كُنتُ مِنَ الظَّالِمِينَ","تیرے سوا کوئی معبود نہیں، تو پاک ہے، بے شک میں ظالموں میں سے تھا","There is no deity except You; exalted are You. Indeed, I have been of the wrongdoers.",["heartbroken","dua","repentance","distress"],["no god but you","yunus","dua","distress","desperate","dark place","prayer of yunus","crying to allah"]],[58,10,"إِنَّمَا النَّجْوَىٰ مِنَ الشَّيْطَانِ","سرگوشی تو شیطان کی طرف سے ہوتی ہے","Whispering is from Satan.",["heartbroken","shaitan","negativity"],["whisper","devil","shaitan","negative thoughts","intrusive thoughts","evil thoughts"]],[4,110,"وَمَن يَعْمَلْ سُوءًا أَوْ يَظْلِمْ نَفْسَهُ ثُمَّ يَسْتَغْفِرِ اللَّهَ يَجِدِ اللَّهَ غَفُورًا رَّحِيمًا","اور جو برا کام کرے یا اپنے آپ پر ظلم کرے، پھر اللہ سے معافی مانگے تو اللہ کو بہت معاف کرنے والا پائے گا","Whoever does evil or wrongs himself but then seeks forgiveness of Allah will find Allah Forgiving and Merciful.",["repentance","forgiveness","sins"],["evil","wrong","seek forgiveness","istighfar","repent","sin","guilty","forgiven","merciful"]],[3,135,"وَالَّذِينَ إِذَا فَعَلُوا فَاحِشَةً أَوْ ظَلَمُوا أَنفُسَهُمْ ذَكَرُوا اللَّهَ فَاسْتَغْفَرُوا لِذُنُوبِهِمْ","اور جب کوئی فحش کام کریں یا اپنے آپ پر ظلم کریں تو اللہ کو یاد کرتے ہیں اور اپنے گناہوں کی معافی مانگتے ہیں","Those who, when they commit an immorality or wrong themselves, remember Allah and seek forgiveness for their sins.",["repentance","forgiveness","sins"],["sin","immorality","remember allah","forgiveness","repent","wrong","guilty","shameful acts","tawbah"]],[25,70,"إِلَّا مَن تَابَ وَآمَنَ وَعَمِلَ عَمَلًا صَالِحًا","مگر جس نے توبہ کی، ایمان لایا اور نیک عمل کیا","Except for those who repent, believe and do righteous work.",["repentance","hope","good deeds"],["repent","believe","righteous","tawbah","new start","change","good deeds","turning back"]],[33,3,"وَتَوَكَّلْ عَلَى اللَّهِ ۚ وَكَفَىٰ بِاللَّهِ وَكِيلًا","اور اللہ پر توکل کرو اور اللہ کافی ہے کارساز کے طور پر","And rely upon Allah; and sufficient is Allah as Disposer of affairs.",["trust","tawakkul"],["trust","rely","sufficient","disposer","affairs","wakeelen","tawakkul"]],[58,22,"أُولَٰئِكَ كَتَبَ فِي قُلُوبِهِمُ الْإِيمَانَ","یہ وہ لوگ ہیں جن کے دلوں میں اللہ نے ایمان نقش کر دیا ہے","Those — He has decreed within their hearts faith.",["trust","faith","heart"],["faith","heart","decreed","iman","strong faith","trust allah"]],[2,186,"وَإِذَا سَأَلَكَ عِبَادِي عَنِّي فَإِنِّي قَرِيبٌ","اور جب میرے بندے تجھ سے میرے بارے میں پوچھیں تو میں قریب ہوں","And when My servants ask you concerning Me — indeed I am near.",["prayer","dua","closeness"],["near","close","dua","prayer","ask","respond","i am near","qareeb","allah near","allah close"]],[40,60,"وَقَالَ رَبُّكُمُ ادْعُونِي أَسْتَجِبْ لَكُمْ","تمہارے رب نے فرمایا: مجھ سے دعا کرو، میں قبول کروں گا","And your Lord says: Call upon Me; I will respond to you.",["prayer","dua","response"],["call","pray","respond","dua","accepted","answer","ask allah","make dua","call on me"]],[3,8,"رَبَّنَا لَا تُزِغْ قُلُوبَنَا بَعْدَ إِذْ هَدَيْتَنَا","اے ہمارے رب! ہمارے دلوں کو ہدایت کے بعد ٹیڑھا نہ کر","Our Lord, let not our hearts deviate after You have guided us.",["prayer","guidance","dua","heart"],["deviate","heart","guided","prayer","dua","steadfast","keep guided","dont stray"]],[7,55,"ادْعُوا رَبَّكُمْ تَضَرُّعًا وَخُفْيَةً","اپنے رب سے گڑگڑا کر اور پوشیدہ طور پر دعا کرو","Call upon your Lord in humility and privately.",["prayer","dua","humility"],["call","humility","private","quietly","dua","pray","humble","secretly","whisper prayer"]],[96,1,"اقْرَأْ بِاسْمِ رَبِّكَ الَّذِي خَلَقَ","اپنے رب کے نام سے پڑھو جس نے پیدا کیا","Read in the name of your Lord who created.",["knowledge","quran","learning"],["read","learn","knowledge","iqra","study","education","first revelation"]],[58,11,"يَرْفَعِ اللَّهُ الَّذِينَ آمَنُوا مِنكُمْ وَالَّذِينَ أُوتُوا الْعِلْمَ دَرَجَاتٍ","اللہ تم میں سے ایمان لانے والوں اور علم دیے جانے والوں کے درجات بلند کرتا ہے","Allah will raise those who have believed among you and those who were given knowledge, by degrees.",["knowledge","faith","status"],["raise","degrees","knowledge","believe","status","ilm","scholars","elevated"]],[39,9,"هَلْ يَسْتَوِي الَّذِينَ يَعْلَمُونَ وَالَّذِينَ لَا يَعْلَمُونَ","کیا جاننے والے اور نہ جاننے والے برابر ہیں","Are those who know equal to those who do not know?",["knowledge","wisdom"],["know","equal","not know","knowledge","difference","scholars","ignorant","wisdom","educated"]],[65,7,"سَيَجْعَلُ اللَّهُ بَعْدَ عُسْرٍ يُسْرًا","اللہ مشکل کے بعد آسانی پیدا کر دے گا","Allah will bring about, after hardship, ease.",["hardship","hope","ease"],["after hardship","ease","soon","will come","allah will","better","relief coming"]],[3,185,"كُلُّ نَفْسٍ ذَائِقَةُ الْمَوْتِ","ہر جان کو موت کا مزہ چکھنا ہے","Every soul will taste death.",["death","afterlife"],["death","every soul","inevitable","taste","mortality","life ends","death coming"]],[89,27,"يَا أَيَّتُهَا النَّفْسُ الْمُطْمَئِنَّةُ","اے مطمئن روح!","O reassured soul,",["death","afterlife","peace"],["reassured","soul","peaceful","nafs mutmainna","tranquil soul","satisfied soul","content soul"]],[89,28,"ارْجِعِي إِلَىٰ رَبِّكِ رَاضِيَةً مَّرْضِيَّةً","اپنے رب کی طرف لوٹ جا، خوشی کے ساتھ اور خوشی کا سبب بن کر","Return to your Lord, well-pleased and pleasing to Him.",["death","afterlife","peace","jannah"],["return","pleased","lord","jannah","heaven","happy","peace death","good death"]],[67,2,"الَّذِي خَلَقَ الْمَوْتَ وَالْحَيَاةَ لِيَبْلُوَكُمْ أَيُّكُمْ أَحْسَنُ عَمَلًا","جس نے موت اور زندگی پیدا کی تاکہ تمہیں آزمائے کہ تم میں سے کون اچھا عمل کرتا ہے","He who created death and life to test you as to which of you is best in deed.",["death","life","purpose","test"],["death","life","created","test","purpose","best deed","why death","meaning of death"]],[17,23,"وَقَضَىٰ رَبُّكَ أَلَّا تَعْبُدُوا إِلَّا إِيَّاهُ وَبِالْوَالِدَيْنِ إِحْسَانًا","تیرے رب نے حکم دیا کہ اس کے سوا کسی کی عبادت نہ کرو اور والدین کے ساتھ اچھا سلوک کرو","Your Lord has decreed that you worship none but Him, and to parents, good treatment.",["parents","family","respect"],["parents","mother","father","good treatment","respect","ihsan","birrul walidayn","honor parents"]],[17,24,"وَاخْفِضْ لَهُمَا جَنَاحَ الذُّلِّ مِنَ الرَّحْمَةِ","اور ان کے لیے نرمی کا بازو جھکا دے رحمت کے ساتھ","And lower to them the wing of humility out of mercy.",["parents","family","humility"],["humble","mercy","wing","lower","parents","kindness","soft","gentle with parents"]],[31,14,"وَوَصَّيْنَا الْإِنسَانَ بِوَالِدَيْهِ","ہم نے انسان کو اس کے والدین کے بارے میں تاکید کی","And We have enjoined upon man to take care of his parents.",["parents","family","duty"],["enjoined","parents","duty","care","honor","obligation","right of parents"]],[46,15,"وَوَصَّيْنَا الْإِنسَانَ بِوَالِدَيْهِ إِحْسَانًا","ہم نے انسان کو اس کے والدین کے ساتھ اچھا سلوک کرنے کی تاکید کی","And We have enjoined upon man, to his parents, good treatment.",["parents","family","respect"],["parents","good treatment","enjoined","ihsan","kind","respect"]],[11,6,"وَمَا مِن دَابَّةٍ فِي الْأَرْضِ إِلَّا عَلَى اللَّهِ رِزْقُهَا","زمین میں کوئی چلنے پھرنے والا نہیں مگر اس کا رزق اللہ نے اپنے ذمے لیا ہے","And there is no creature on earth but that upon Allah is its provision.",["wealth","rizq","trust","poverty"],["rizq","provision","allah provides","sustenance","money","poverty","wealth","poor","struggling financially","food"]],[51,22,"وَفِي السَّمَاءِ رِزْقُكُمْ وَمَا تُوعَدُونَ","اور آسمان میں تمہارا رزق ہے اور وہ بھی جس کا تم سے وعدہ کیا گیا ہے","And in the heaven is your provision and whatever you are promised.",["wealth","rizq","trust"],["rizq","heaven","provision","promised","sustenance","money","financial"]],[73,20,"وَمَا تُقَدِّمُوا لِأَنفُسِكُم مِّنْ خَيْرٍ تَجِدُوهُ عِندَ اللَّهِ","اور جو کچھ تم اپنے لیے نیکی آگے بھیجو گے اسے اللہ کے پاس پاؤ گے","Whatever you put forward for yourselves of good, you will find it with Allah.",["wealth","charity","afterlife"],["put forward","good","find","charity","sadaqah","invest akhirah","reward stored"]],[26,80,"وَإِذَا مَرِضْتُ فَهُوَ يَشْفِينِ","اور جب میں بیمار ہوتا ہوں تو وہی مجھے شفا دیتا ہے","And when I am ill, it is He who cures me.",["health","illness","healing","dua"],["sick","ill","heal","cure","shifa","disease","health","recover","better","medical","pain","suffer"]],[17,82,"وَنُنَزِّلُ مِنَ الْقُرْآنِ مَا هُوَ شِفَاءٌ وَرَحْمَةٌ","ہم قرآن میں سے وہ نازل کرتے ہیں جو شفا اور رحمت ہے","We send down of the Quran that which is healing and mercy.",["health","illness","quran","healing"],["shifa","healing","quran","mercy","cure","disease","health","recovery"]],[10,57,"وَشِفَاءٌ لِّمَا فِي الصُّدُورِ","اور سینوں کی بیماریوں کے لیے شفا ہے","And a healing for what is in the breasts.",["health","illness","heart","healing"],["healing","chest","breast","heart disease","mental","soul healing","cure within"]],[48,4,"هُوَ الَّذِي أَنزَلَ السَّكِينَةَ فِي قُلُوبِ الْمُؤْمِنِينَ","وہی ہے جس نے مومنوں کے دلوں میں سکون نازل فرمایا","It is He who sent down tranquility into the hearts of the believers.",["peaceful","peace","faith","heart"],["peace","tranquility","hearts","believers","sakina","calm","serene","sakeena","at peace"]],[4,65,"وَيُسَلِّمُوا تَسْلِيمًا","اور پوری طرح فرمانبردار ہو جائیں","And submit with full submission.",["peaceful","submission","faith","islam"],["submit","peace","submission","full","islam","surrender to allah","let go","tawakkul"]],[10,35,"قُلِ اللَّهُ يَهْدِي لِلْحَقِّ","کہہ دو: اللہ حق کی طرف ہدایت دیتا ہے","Say: Allah guides to the truth.",["seeking guidance","guidance","truth"],["truth","guide","haqq","guidance","shows","right path","allah guides"]],[18,24,"وَاذْكُر رَّبَّكَ إِذَا نَسِيتَ","اور جب بھول جاؤ تو اپنے رب کو یاد کر لو","And remember your Lord when you forget.",["seeking guidance","dhikr","guidance"],["forget","remember","lord","guidance","return","come back","forgot"]],[29,69,"وَالَّذِينَ جَاهَدُوا فِينَا لَنَهْدِيَنَّهُمْ سُبُلَنَا","اور جو لوگ ہماری راہ میں کوشش کرتے ہیں، ہم انہیں اپنے راستے دکھاتے ہیں","Those who strive for Us — We will surely guide them to Our ways.",["seeking guidance","effort","guidance"],["strive","effort","guide","ways","paths","jihad","seeking","guidance for effort","work hard"]]];
+
+// ── HADITH DATABASE ────────────────────────────────────────────────────
+// Format: [book, book_ar, number, grade, narrator, arabic, english, topics[], keywords[]]
+var HADITH_DB = [["Sahih Bukhari","صحيح البخاري","1469","Sahih","Abu Sa'id Al-Khudri (RA)","مَا يُصِيبُ الْمُسْلِمَ مِنْ نَصَبٍ وَلَا وَصَبٍ وَلَا هَمٍّ وَلَا حُزْنٍ وَلَا أَذًى وَلَا غَمٍّ حَتَّى الشَّوْكَةِ يُشَاكُهَا إِلَّا كَفَّرَ اللَّهُ بِهَا مِنْ خَطَايَاهُ","کسی مسلمان کو جو بھی تکلیف، بیماری، پریشانی، غم، تکلیف یا دکھ پہنچتا ہے — یہاں تک کہ ایک کانٹا بھی جو اسے چبھے — اللہ اس کے ذریعے اس کے گناہ معاف فرما دیتا ہے۔","No Muslim is afflicted with fatigue, illness, worry, grief, harm or distress — even a thorn that pricks him — except that Allah expiates his sins.","یہ حدیث ہمیں بتاتی ہے کہ مسلمان کو پہنچنے والی ہر تکلیف — چاہے کتنی ہی چھوٹی ہو — اس کے گناہوں کا کفارہ بن جاتی ہے۔ اس لیے مشکل وقت میں صبر کریں کیونکہ ہر تکلیف آپ کو پاک کر رہی ہے۔",["patience","hardship","illness","sadness"],["tired","sick","worry","grief","pain","thorn","expiate","sins","suffering","hardship","patient"]],["Sahih Muslim","صحيح مسلم","2999","Sahih","Suhaib (RA)","عَجَبًا لِأَمْرِ الْمُؤْمِنِ إِنَّ أَمْرَهُ كُلَّهُ خَيْرٌ وَلَيْسَ ذَاكَ لِأَحَدٍ إِلَّا لِلْمُؤْمِنِ إِنْ أَصَابَتْهُ سَرَّاءُ شَكَرَ فَكَانَ خَيْرًا لَهُ وَإِنْ أَصَابَتْهُ ضَرَّاءُ صَبَرَ فَكَانَ خَيْرًا لَهُ","مومن کا معاملہ عجیب ہے! اس کا ہر حال اس کے لیے خیر ہے۔ خوشی ملے تو شکر کرتا ہے — یہ اس کے لیے خیر ہے۔ تکلیف آئے تو صبر کرتا ہے — یہ بھی اس کے لیے خیر ہے۔ یہ خاصیت صرف مومن کو ملتی ہے۔","Wonderful is the affair of the believer; there is good for him in everything. If prosperity comes his way, he gives thanks and that is good. If adversity falls on him, he endures patiently and that is good.","مومن کے لیے خوشی اور غم دونوں میں بھلائی ہے — شکر اور صبر دونوں نجات کا ذریعہ ہیں۔ یہ حدیث ہمیں سکھاتی ہے کہ زندگی کے ہر موڑ پر اللہ کی طرف رخ کرنا ہی اصل کامیابی ہے۔",["patience","gratitude","faith","hardship"],["believer","prosperity","gratitude","adversity","patience","wonderful","all good","thankful","trials"]],["Sahih Bukhari","صحيح البخاري","5641","Sahih","Ibn Mas'ud (RA)","مَا مِنْ مُسْلِمٍ يُصِيبُهُ أَذًى مِنْ مَرَضٍ فَمَا سِوَاهُ إِلَّا حَطَّ اللَّهُ بِهِ سَيِّئَاتِهِ كَمَا تَحُطُّ الشَّجَرَةُ وَرَقَهَا","جس مسلمان کو کوئی بیماری یا کوئی اور تکلیف پہنچے، اللہ اس کے گناہوں کو ایسے جھاڑ دیتا ہے جیسے درخت اپنے پتے جھاڑتا ہے۔","No Muslim is stricken with illness or any other harm but Allah will remove his sins, just as a tree sheds its leaves.","بیماری میں گھبرائیں نہیں۔ یہ آپ کے گناہوں کی صفائی کا وقت ہے۔ اللہ آپ کو تکلیف میں بھی پاک کر رہے ہیں — جیسے خزاں میں درخت کے پتے گرتے ہیں اور درخت نئے پتوں کے لیے تیار ہوتا ہے۔",["patience","illness","purification"],["illness","harm","sins removed","leaves","tree","purification","sick","expiate"]],["Jami Tirmidhi","سنن الترمذي","2396","Hasan","Anas ibn Malik (RA)","عِظَمُ الْجَزَاءِ مَعَ عِظَمِ الْبَلَاءِ وَإِنَّ اللَّهَ إِذَا أَحَبَّ قَوْمًا ابْتَلَاهُمْ","بدلہ جتنا بڑا ہوگا، آزمائش بھی اتنی ہی بڑی ہوگی۔ اور جب اللہ کسی قوم سے محبت کرتا ہے تو انہیں آزماتا ہے۔","The greatness of the reward is tied to the greatness of the trial. When Allah loves a people, He tests them.","مشکل وقت میں یاد رکھیں — جتنی بڑی آزمائش، اتنا بڑا اجر۔ اور آزمائش خود اس بات کی علامت ہے کہ اللہ آپ سے محبت کرتا ہے اور آپ کا درجہ بلند کرنا چاہتا ہے۔",["patience","trial","love of allah","hardship"],["reward","trial","test","love","hardship","tribulation","tested","loved by allah","patient reward"]],["Sahih Bukhari","صحيح البخاري","527","Sahih","Ibn Umar (RA)","بُنِيَ الإِسْلامُ عَلَى خَمْسٍ شَهَادَةِ أَنْ لاَ إِلَهَ إِلاَّ اللَّهُ وَأَنَّ مُحَمَّدًا رَسُولُ اللَّهِ وَإِقَامِ الصَّلاَةِ وَإِيتَاءِ الزَّكَاةِ وَالْحَجِّ وَصَوْمِ رَمَضَانَ","اسلام کی بنیاد پانچ چیزوں پر ہے: اس بات کی گواہی کہ اللہ کے سوا کوئی معبود نہیں اور محمد ﷺ اللہ کے رسول ہیں، نماز قائم کرنا، زکوٰۃ دینا، حج کرنا، اور رمضان کے روزے رکھنا۔","Islam is built upon five: testimony that none has the right to be worshipped but Allah and that Muhammad is His Messenger, establishing the prayer, giving Zakah, Hajj, and fasting in Ramadan.","یہ پانچ ارکان اسلام کی بنیاد ہیں۔ جو مسلمان ان پر قائم رہے اس کی پوری زندگی اللہ کی رضا کے مطابق گزرتی ہے۔",["prayer","pillars","faith","islam"],["pillars","islam","prayer","salah","zakat","hajj","fasting","five","shahada","testimony"]],["Sahih Muslim","صحيح مسلم","223","Sahih","Abu Malik Al-Ash'ari (RA)","الصَّلَاةُ نُورٌ","نماز نور ہے۔","Prayer is a light.","نماز دل اور زندگی دونوں کو روشن کرتی ہے۔ جو نماز پڑھتا ہے اس کے چہرے اور دل میں ایک الگ نور آجاتا ہے جو دنیا اور آخرت دونوں میں کام آتا ہے۔",["prayer","faith","light"],["prayer","light","nur","salah","namaz","illumination","brightness"]],["Sahih Bukhari","صحيح البخاري","6954","Sahih","Abu Hurairah (RA)","أَقْرَبُ مَا يَكُونُ الْعَبْدُ مِنْ رَبِّهِ وَهُوَ سَاجِدٌ فَأَكْثِرُوا الدُّعَاءَ","بندہ سب سے زیادہ اپنے رب کے قریب اس وقت ہوتا ہے جب سجدے میں ہوتا ہے، اس لیے سجدے میں خوب دعائیں مانگو۔","The closest a servant comes to his Lord is when he is in prostration, so make much supplication.","سجدہ وہ مقام ہے جہاں بندہ اور رب کے درمیان سب سے کم فاصلہ ہوتا ہے۔ جب بھی کوئی مشکل ہو، سجدے میں گر جائیں اور دل کی بات کریں — اللہ سننے والا ہے۔",["prayer","dua","closeness","sujood"],["prostration","sujood","closest","lord","dua","supplication","near","sajda","prayer"]],["Sunan Abu Dawud","سنن أبي داود","1277","Sahih","Ali ibn Abi Talib (RA)","كَانَ النَّبِيُّ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ إِذَا أَحْزَنَهُ أَمْرٌ فَزِعَ إِلَى الصَّلَاةِ","جب نبی ﷺ کو کوئی بات غمگین کرتی تو آپ نماز کی طرف لپکتے۔","When something distressed the Prophet (ﷺ), he would turn to prayer.","نبی ﷺ کا طریقہ تھا کہ ہر پریشانی میں نماز کا سہارا لیتے۔ یہ ہمارے لیے سبق ہے کہ جب دل بھاری ہو تو سجدے میں جائیں — وہاں سکون ملتا ہے۔",["prayer","sadness","anxiety","distress"],["distressed","worried","sad","prophet","prayer","salah","turned to","relief in prayer","anxious"]],["Sahih Bukhari","صحيح البخاري","6011","Sahih","Abdullah ibn Amr (RA)","خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ","تم میں سے بہترین وہ ہے جو قرآن سیکھے اور دوسروں کو سکھائے۔","The best among you are those who learn the Quran and teach it.","قرآن سیکھنا اور سکھانا سب سے بڑی عبادت ہے۔ یہ حدیث ہمیں ترغیب دیتی ہے کہ قرآن پڑھنے کے ساتھ اسے دوسروں تک پہنچانے کی کوشش بھی کریں۔",["knowledge","quran","good character"],["best","quran","learn","teach","good","excellent","superior"]],["Sahih Muslim","صحيح مسلم","2564","Sahih","Abu Hurairah (RA)","لَا تَحَاسَدُوا وَلَا تَنَاجَشُوا وَلَا تَبَاغَضُوا وَلَا تَدَابَرُوا وَكُونُوا عِبَادَ اللَّهِ إِخْوَانًا","آپس میں حسد نہ کرو، دھوکہ نہ دو، ایک دوسرے سے نفرت نہ کرو، ایک دوسرے سے منہ نہ موڑو — اور اللہ کے بندے، بھائی بھائی بن کر رہو۔","Do not envy one another, do not outbid one another, do not hate one another, do not turn away from one another. Be, O servants of Allah, brothers.","اسلام میں برادری کی بنیاد محبت اور احترام پر ہے۔ حسد، نفرت اور دشمنی اس بنیاد کو کمزور کرتے ہیں۔ مومنوں کو ایک جسم کی طرح ہونا چاہیے۔",["brotherhood","kindness","anger","jealousy"],["envy","hate","turn away","brothers","servants","brotherhood","kindness","jealous","angry","hostility"]],["Jami Tirmidhi","سنن الترمذي","2004","Sahih","Abu Darda (RA)","مَا شَيْءٌ أَثْقَلُ فِي مِيزَانِ الْمُؤْمِنِ يَوْمَ الْقِيَامَةِ مِنْ حُسْنِ الْخُلُقِ","قیامت کے دن مومن کے میزان میں اچھے اخلاق سے بھاری کوئی چیز نہیں ہوگی۔","Nothing is heavier on the scale of a believer on the Day of Judgment than good character.","اچھا اخلاق صرف دنیا میں نہیں، آخرت میں بھی سب سے قیمتی دولت ہے۔ جو لوگوں کے ساتھ اچھا برتاؤ کرتا ہے، اس کا میزان قیامت کے دن بھاری ہوگا۔",["good character","kindness","afterlife"],["heavier","scale","good character","judgment","day","akhlaq","character","weighs"]],["Sahih Bukhari","صحيح البخاري","6029","Sahih","Abu Hurairah (RA)","أَكْمَلُ الْمُؤْمِنِينَ إِيمَانًا أَحْسَنُهُمْ خُلُقًا","ایمان میں سب سے کامل مومن وہ ہے جس کا اخلاق سب سے اچھا ہو۔","The most complete of the believers in faith is the one with the best character.","ایمان اور اخلاق لازم و ملزوم ہیں۔ جتنا اچھا اخلاق، اتنا مضبوط ایمان۔ اچھا کردار دراصل ایمان کا عملی مظاہرہ ہے۔",["good character","faith"],["complete","faith","best character","akhlaq","most complete","believer"]],["Sahih Bukhari","صحيح البخاري","6116","Sahih","Abu Hurairah (RA)","لَيْسَ الشَّدِيدُ بِالصُّرَعَةِ إِنَّمَا الشَّدِيدُ الَّذِي يَمْلِكُ نَفْسَهُ عِنْدَ الْغَضَبِ","طاقتور وہ نہیں جو پہلوانی میں جیتے — طاقتور وہ ہے جو غصے میں اپنے آپ پر قابو رکھے۔","The strong man is not the one who can wrestle. The strong man is the one who controls himself when he is angry.","اصل طاقت جسمانی نہیں، نفسانی ہے۔ غصے میں خود پر قابو رکھنا سب سے مشکل اور سب سے بڑا جہاد ہے۔ یہ حدیث ہمیں سکھاتی ہے کہ غصہ پینا کمزوری نہیں، طاقت کی نشانی ہے۔",["anger","self-control","strength"],["strong","wrestle","control","anger","angry","self-control","strength","powerful","real strength"]],["Sahih Bukhari","صحيح البخاري","6115","Sahih","Abu Hurairah (RA)","جَاءَ رَجُلٌ إِلَى النَّبِيِّ فَقَالَ أَوْصِنِي قَالَ لَا تَغْضَبْ","ایک آدمی نبی ﷺ کے پاس آیا اور کہا: مجھے وصیت کریں۔ آپ ﷺ نے فرمایا: غصہ نہ کرو۔ اس نے بار بار پوچھا اور آپ ﷺ نے ہر بار یہی فرمایا: غصہ نہ کرو۔","A man asked the Prophet for advice. He said: Do not get angry. The man repeated his request several times and each time the Prophet said: Do not get angry.","نبی ﷺ کا یہ جواب اتنا جامع ہے کہ دہرایا۔ غصہ نہ کرنا — یہ ایک نصیحت کئی مسائل کا حل ہے: رشتے، صحت، گناہ، پچھتاوا سب اس ایک بات میں آجاتے ہیں۔",["anger","advice","self-control"],["dont get angry","advice","anger","angry","repeat","prophet advice","counsel","anger control"]],["Sunan Abu Dawud","سنن أبي داود","4782","Hasan","Mu'adh ibn Anas (RA)","مَنْ كَظَمَ غَيْظًا وَهُوَ قَادِرٌ عَلَى أَنْ يُنَفِّذَهُ دَعَاهُ اللَّهُ عَلَى رُءُوسِ الْخَلَائِقِ يَوْمَ الْقِيَامَةِ","جو اپنا غصہ پی جائے جبکہ وہ اسے نکال سکتا تھا، اللہ اسے قیامت کے دن تمام مخلوقات کے سامنے بلائے گا اور اسے جنت کی جو حور چاہے اختیار کرنے دے گا۔","Whoever suppresses his anger when he is able to act upon it, Allah will call him before all of creation on the Day of Resurrection and let him choose as he wills.","غصہ پینا آسان نہیں — لیکن اس کا اجر بے حساب ہے۔ جو شخص اپنی قدرت رکھتے ہوئے بھی غصہ نہ نکالے، اس کا مقام قیامت کے دن بہت بلند ہوگا۔",["anger","reward","self-control"],["suppress","anger","reward","day of resurrection","able","control anger","great reward"]],["Sahih Bukhari","صحيح البخاري","6094","Sahih","Abdullah ibn Mas'ud (RA)","عَلَيْكُمْ بِالصِّدْقِ فَإِنَّ الصِّدْقِ يَهْدِي إِلَى الْبِرِّ وَإِنَّ الْبِرَّ يَهْدِي إِلَى الْجَنَّةِ","سچ بولو — سچ نیکی کی طرف لے جاتا ہے اور نیکی جنت کی طرف لے جاتی ہے۔","You must be truthful. Verily, truth leads to righteousness, and righteousness leads to Paradise.","سچائی ایک زنجیر کی طرح ہے جو انسان کو جنت تک پہنچاتی ہے۔ سچ بولنا مشکل لگتا ہے لیکن اس کا راستہ صاف اور سیدھا ہے — جھوٹ آسان لگتا ہے لیکن اس کا انجام تباہ کن ہے۔",["honesty","character","paradise"],["truthful","truth","righteousness","birr","paradise","jannah","honest","leads to","sadiq"]],["Sahih Muslim","صحيح مسلم","2607","Sahih","Abu Hurairah (RA)","عَلامَةُ الْمُنَافِقِ ثَلاثٌ إِذَا حَدَّثَ كَذَبَ وَإِذَا وَعَدَ أَخْلَفَ وَإِذَا اؤْتُمِنَ خَانَ","منافق کی تین نشانیاں ہیں: جب بات کرے تو جھوٹ بولے، جب وعدہ کرے تو توڑے، اور جب امانت دی جائے تو خیانت کرے۔","The signs of a hypocrite are three: when he speaks, he lies; when he promises, he breaks it; and when he is trusted, he betrays.","یہ تین نشانیاں انسان کے اصل کردار کو ظاہر کرتی ہیں۔ مسلمان کو چاہیے کہ سچ بولے، وعدہ پورا کرے اور امانت ادا کرے — یہی اسلامی کردار کی بنیاد ہے۔",["honesty","faith","character"],["hypocrite","munafiq","lie","promise","betray","trust","signs","dishonest","liar","breaks promise"]],["Sahih Bukhari","صحيح البخاري","5971","Sahih","Abdullah ibn Mas'ud (RA)","أَيُّ الْعَمَلِ أَحَبُّ إِلَى اللَّهِ قَالَ الصَّلَاةُ عَلَى وَقْتِهَا قَالَ ثُمَّ أَيٌّ قَالَ بِرُّ الْوَالِدَيْنِ","میں نے پوچھا: اللہ کو سب سے پیاری عمل کونسی ہے؟ فرمایا: وقت پر نماز۔ میں نے پھر پوچھا: پھر کون سی؟ فرمایا: والدین کے ساتھ اچھا سلوک۔","I asked the Prophet which deed is most beloved to Allah. He said: Prayer on time. I asked: Then what? He said: Honoring one's parents.","اللہ کے نزدیک پہلا مقام وقت پر نماز کا ہے اور دوسرا والدین کی خدمت کا۔ یہ دو کام اگر درست ہو جائیں تو انسان کی دنیا اور آخرت دونوں سنور جاتے ہیں۔",["parents","prayer","good deeds"],["most beloved","prayer","time","parents","honor","birrul walidayn","deed","best action","please allah"]],["Sahih Muslim","صحيح مسلم","2549","Sahih","Abu Hurairah (RA)","رَغِمَ أَنْفُهُ ثُمَّ رَغِمَ أَنْفُهُ ثُمَّ رَغِمَ أَنْفُهُ قِيلَ مَنْ يَا رَسُولَ اللَّهِ قَالَ مَنْ أَدْرَكَ وَالِدَيْهِ عِنْدَ الْكِبَرِ أَحَدَهُمَا أَوْ كِلَيْهِمَا ثُمَّ لَمْ يَدْخُلِ الْجَنَّةَ","وہ ذلیل ہو، وہ ذلیل ہو، وہ ذلیل ہو۔ پوچھا گیا: کون یا رسول اللہ؟ فرمایا: وہ جس نے اپنے والدین میں سے ایک یا دونوں کو بڑھاپے میں پایا اور پھر جنت میں داخل نہ ہوا۔","Disgraced is the one who finds his parents in old age — one or both — yet does not enter Paradise.","والدین کا بڑھاپا جنت کا سب سے آسان دروازہ ہے — اگر ہم نے ان کی خدمت کی۔ نبی ﷺ نے تین بار کہا: وہ ذلیل ہو — یہ کتنی بڑی تنبیہ ہے ان لوگوں کے لیے جو اپنے والدین کو نظرانداز کرتے ہیں۔",["parents","paradise","family"],["disgraced","parents","old age","paradise","jannah","shame","opportunity","serve parents"]],["Jami Tirmidhi","سنن الترمذي","1899","Sahih","Abdullah ibn Umar (RA)","رِضَا اللَّهِ فِي رِضَا الْوَالِدَيْنِ وَسَخَطُ اللَّهِ فِي سَخَطِ الْوَالِدَيْنِ","اللہ کی رضا والدین کی رضا میں ہے اور اللہ کا غصہ والدین کے غصے میں ہے۔","The pleasure of Allah is in the pleasure of parents, and the anger of Allah is in the anger of parents.","والدین کو خوش رکھنا اللہ کو خوش رکھنا ہے۔ اگر والدین ناراض ہوں اور وہ ناراضگی حق پر مبنی ہو تو اللہ بھی ناراض ہوتا ہے — اس لیے ہر ممکن طریقے سے والدین کو راضی رکھیں۔",["parents","family","worship"],["pleasure allah","parents","anger","pleasing parents","rida","wrath","displease parents","satisfy"]],["Sahih Bukhari","صحيح البخاري","1374","Sahih","Abu Hurairah (RA)","مَا نَقَصَتْ صَدَقَةٌ مِنْ مَالٍ","صدقہ مال کو کم نہیں کرتا۔","Charity does not decrease wealth.","صدقہ دینے سے مال کم نہیں ہوتا بلکہ بڑھتا ہے — دنیا میں بھی اور آخرت میں بھی۔ یہ اللہ کا وعدہ ہے اور اللہ کے وعدے میں کوئی کمی نہیں۔",["charity","wealth","blessings"],["charity","decrease","wealth","sadaqah","give","less","not decrease","generosity"]],["Sahih Muslim","صحيح مسلم","1631","Sahih","Abu Hurairah (RA)","إِذَا مَاتَ الإِنْسَانُ انْقَطَعَ عَنْهُ عَمَلُهُ إِلاَّ مِنْ ثَلاَثَةٍ إِلاَّ مِنْ صَدَقَةٍ جَارِيَةٍ أَوْ عِلْمٍ يُنْتَفَعُ بِهِ أَوْ وَلَدٍ صَالِحٍ يَدْعُو لَهُ","جب انسان مر جاتا ہے تو اس کے اعمال ختم ہو جاتے ہیں سوائے تین کے: جاری صدقے، ایسے علم کے جس سے فائدہ اٹھایا جائے، یا نیک اولاد کی دعا۔","When a person dies, all their deeds end except three: ongoing charity, beneficial knowledge, or a righteous child who prays for them.","موت کے بعد بھی کچھ چیزیں ساتھ جاتی رہتی ہیں۔ مسجد بنانا، کنواں کھودنا، درخت لگانا، کتاب لکھنا، بچوں کو دین سکھانا — یہ سب صدقہ جاریہ ہیں۔",["charity","afterlife","knowledge","children"],["die","deeds","charity","knowledge","righteous child","ongoing","sadaqah jariyah","three things","after death","continuous"]],["Sahih Bukhari","صحيح البخاري","1413","Sahih","Abu Hurairah (RA)","السَّاعِي عَلَى الأَرْمَلَةِ وَالْمِسْكِينِ كَالْمُجَاهِدِ فِي سَبِيلِ اللَّهِ","بیوہ اور مسکین کی مدد کے لیے دوڑنے والا اللہ کی راہ میں جہاد کرنے والے کی طرح ہے۔","One who strives to help widows and the poor is like a warrior striving in the way of Allah.","معاشرے کے کمزور لوگوں کی مدد کرنا جہاد کے برابر ہے۔ یہ حدیث ہمیں ترغیب دیتی ہے کہ غریبوں، بیواؤں اور یتیموں کی مدد کو معمول بنائیں۔",["charity","poor","good deeds"],["widow","poor","strive","warrior","jihad","path of allah","help","needy","charity","support"]],["Jami Tirmidhi","سنن الترمذي","3543","Sahih","Aisha (RA)","اللَّهُمَّ إِنَّكَ عَفُوٌّ تُحِبُّ الْعَفْوَ فَاعْفُ عَنِّي","اے اللہ! تو معاف کرنے والا ہے، معافی کو پسند کرتا ہے — پس مجھے معاف فرما دے۔","O Allah, You are the Pardoner and You love pardon, so pardon me.","یہ دعا نبی ﷺ نے حضرت عائشہؓ کو شبِ قدر کے لیے سکھائی۔ یہ مختصر لیکن جامع دعا ہے جو اللہ کی تین صفات کو بیان کرتی ہے: معاف کرنا، معافی کو پسند کرنا، اور ہم سے معافی مانگنا۔",["forgiveness","dua","repentance"],["pardon","love","forgiveness","dua","laylatul qadr","night of power","repentance","aisha","seeking forgiveness"]],["Sahih Bukhari","صحيح البخاري","6307","Sahih","Abu Hurairah (RA)","يَنْزِلُ رَبُّنَا كُلَّ لَيْلَةٍ إِلَى السَّمَاءِ الدُّنْيَا حِينَ يَبْقَى ثُلُثُ اللَّيْلِ الآخِرُ فَيَقُولُ مَنْ يَدْعُونِي فَأَسْتَجِيبَ لَهُ","ہمارا رب ہر رات آخری تہائی حصے میں دنیا کے قریبی آسمان پر نزول فرماتا ہے اور کہتا ہے: کون ہے جو مجھ سے دعا کرے تاکہ میں قبول کروں؟ کون مانگے تاکہ میں دوں؟ کون معافی مانگے تاکہ میں معاف کروں؟","Our Lord descends every night in the last third of the night, saying: Who is calling upon Me? I will answer. Who is asking of Me? I will give. Who is seeking My forgiveness? I will forgive.","رات کا آخری حصہ سب سے قیمتی وقت ہے۔ اللہ خود پوچھتا ہے: کون ہے جو مانگے؟ اس وقت جاگنا اور دعا کرنا بے شمار رحمتوں کا دروازہ ہے۔",["forgiveness","prayer","night","dua"],["descend","last third","night","answer","give","forgive","tahajjud","calling","who calls","who asks"]],["Sahih Muslim","صحيح مسلم","918","Sahih","Abu Hurairah (RA)","انْظُرُوا إِلَى مَنْ أَسْفَلَ مِنْكُمْ وَلَا تَنْظُرُوا إِلَى مَنْ هُوَ فَوْقَكُمْ","ان لوگوں کو دیکھو جو تم سے کم ہیں اور ان لوگوں کو نہ دیکھو جو تم سے زیادہ ہیں — اس طرح تم اللہ کی نعمتوں کو کم نہیں سمجھو گے۔","Look at those below you in worldly matters, not those above you. That way you will not underestimate Allah's blessings upon you.","اگر آپ ہمیشہ اپنے سے اوپر والوں کو دیکھیں گے تو شکایت پیدا ہوگی۔ لیکن اگر اپنے سے کم والوں کو دیکھیں تو شکر پیدا ہوگا۔ یہ نظریہ زندگی کو سکون سے بھر دیتا ہے۔",["gratitude","blessings","contentment"],["look below","above","underestimate","blessings","grateful","contentment","thankful","count blessings","compare down"]],["Jami Tirmidhi","سنن الترمذي","2014","Sahih","Anas ibn Malik (RA)","مَنْ أَصْبَحَ مِنْكُمْ آمِنًا فِي سِرْبِهِ مُعَافًى فِي جَسَدِهِ عِنْدَهُ قُوتُ يَوْمِهِ فَكَأَنَّمَا حِيزَتْ لَهُ الدُّنْيَا بِحَذَافِيرِهَا","جو صبح اٹھے اور اس کا گھر محفوظ ہو، جسم صحیح ہو اور آج کا کھانا میسر ہو — گویا پوری دنیا اس کے لیے جمع کر دی گئی۔","Whoever among you wakes up secure in his household, healthy in his body, and has food for the day — it is as if the whole world has been gathered for him.","ہم اکثر بڑی چیزوں کے لیے ترستے رہتے ہیں اور چھوٹی نعمتوں کو نظرانداز کرتے ہیں۔ امن، صحت اور روزی — یہ تینوں ملیں تو کامل دنیا ہے۔",["gratitude","blessings","contentment","health"],["safe","healthy","food","day","whole world","gathered","grateful","contentment","blessing","enough"]],["Sahih Bukhari","صحيح البخاري","6011","Sahih","Anas ibn Malik (RA)","لَا يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لِأَخِيهِ مَا يُحِبُّ لِنَفْسِهِ","تم میں سے کوئی مومن نہیں ہو سکتا جب تک کہ اپنے بھائی کے لیے وہی نہ چاہے جو اپنے لیے چاہتا ہے۔","None of you truly believes until he loves for his brother what he loves for himself.","یہ اسلام کا سنہری اصول ہے۔ اگر ہر مسلمان اس پر عمل کرے تو معاشرے سے حسد، نفرت اور خودغرضی ختم ہو جائے۔",["brotherhood","faith","love"],["love","brother","yourself","faith","believe","golden rule","for others","community"]],["Sahih Muslim","صحيح مسلم","2586","Sahih","Abu Hurairah (RA)","الْمُسْلِمُ أَخُو الْمُسْلِمِ لَا يَظْلِمُهُ وَلَا يُسْلِمُهُ","مسلمان مسلمان کا بھائی ہے — نہ اس پر ظلم کرتا ہے اور نہ اسے بے یارومددگار چھوڑتا ہے۔","A Muslim is the brother of a Muslim — he does not wrong him nor abandon him.","اسلامی برادری کا تقاضہ ہے کہ ہم اپنے بھائیوں کے ساتھ انصاف کریں اور مشکل میں ان کا ساتھ دیں۔ ایک مسلمان کو دوسرے مسلمان کو تنہا نہیں چھوڑنا چاہیے۔",["brotherhood","justice","community"],["muslim","brother","wrong","abandon","betray","help","community","unity","solidarity"]],["Sunan Ibn Majah","سنن ابن ماجه","224","Sahih","Anas ibn Malik (RA)","طَلَبُ الْعِلْمِ فَرِيضَةٌ عَلَى كُلِّ مُسْلِمٍ","علم حاصل کرنا ہر مسلمان پر فرض ہے۔","Seeking knowledge is an obligation upon every Muslim.","علم حاصل کرنا نہ صرف دینی فرض ہے بلکہ دنیاوی ترقی کا بھی ذریعہ ہے۔ یہ فرض مرد اور عورت دونوں پر ہے — کوئی بہانہ قابل قبول نہیں۔",["knowledge","learning","obligation"],["seek","knowledge","obligation","fard","every muslim","learning","education","study","ilm","required"]],["Sunan Abu Dawud","سنن أبي داود","3641","Sahih","Abu Darda (RA)","مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا سَهَّلَ اللَّهُ لَهُ طَرِيقًا إِلَى الْجَنَّةِ","جو علم کی تلاش میں کوئی راستہ اختیار کرے، اللہ اس کے لیے جنت کا راستہ آسان کر دیتا ہے۔","Whoever takes a path in search of knowledge, Allah will make easy for him a path to Paradise.","علم کی راہ جنت کی راہ ہے۔ اسکول، مدرسہ، کتاب یا انٹرنیٹ — جہاں سے بھی علم ملے، اللہ اسے آسان کر دیتا ہے۔",["knowledge","paradise","learning"],["path","knowledge","search","easy","paradise","jannah","ilm","study","learn","education","seek knowledge"]],["Jami Tirmidhi","سنن الترمذي","3479","Sahih","Abu Hurairah (RA)","إِنَّ اللَّهَ يَغْضَبُ عَلَى مَنْ لَا يَسْأَلُهُ","اللہ اس شخص پر ناراض ہوتا ہے جو اس سے نہیں مانگتا۔","Verily Allah is angered by the one who does not ask of Him.","انسانوں سے مانگنا عزت کو کم کرتا ہے لیکن اللہ سے مانگنا اللہ کو خوش کرتا ہے۔ اللہ چاہتا ہے کہ ہم اس سے مانگیں — چھوٹی سے چھوٹی بات بھی۔",["dua","prayer","worship"],["angry","ask","dua","prayer","not asking","supplication","allah angry","dont ask"]],["Sahih Muslim","صحيح مسلم","2735","Sahih","Salman Al-Farisi (RA)","إِنَّ رَبَّكُمْ حَيِيٌّ كَرِيمٌ يَسْتَحِيي مِنْ عَبْدِهِ إِذَا رَفَعَ إِلَيْهِ يَدَيْهِ أَنْ يَرُدَّهُمَا صِفْرًا","تمہارا رب بڑا باحیا اور کریم ہے — جب بندہ اس کی طرف ہاتھ اٹھائے تو وہ انہیں خالی لوٹانے میں شرم محسوس کرتا ہے۔","Your Lord is Generous and Kind. He is too generous to let His servant raise his hands to Him and return them empty.","جب ہم دعا کے لیے ہاتھ اٹھاتے ہیں تو اللہ انہیں خالی نہیں لوٹاتا۔ کبھی دعا فوری قبول ہوتی ہے، کبھی بعد میں، کبھی اس سے بہتر چیز ملتی ہے — لیکن خالی نہیں جاتے۔",["dua","generosity","mercy"],["generous","raise hands","empty","dua","never rejected","answered","kind","generous allah","accepted"]],["Sahih Muslim","صحيح مسلم","2747","Sahih","Abu Hurairah (RA)","وَالَّذِي نَفْسِي بِيَدِهِ لَوْ لَمْ تُذْنِبُوا لَذَهَبَ اللَّهُ بِكُمْ وَلَجَاءَ بِقَوْمٍ يُذْنِبُونَ فَيَسْتَغْفِرُونَ اللَّهَ فَيَغْفِرُ لَهُمْ","اس ذات کی قسم جس کے ہاتھ میں میری جان ہے! اگر تم گناہ نہ کرتے تو اللہ تمہیں لے جاتا اور ایسی قوم لاتا جو گناہ کرتی پھر استغفار کرتی — اور اللہ انہیں معاف کر دیتا۔","By Him in whose hand is my soul, if you did not sin, Allah would take you away and bring a people who sin, then seek forgiveness from Allah, and He would forgive them.","گناہ انسانی فطرت کا حصہ ہے — اہم بات یہ ہے کہ ہم توبہ کریں۔ اللہ کو ایسے بندے پسند ہیں جو گناہ کے بعد اللہ کی طرف پلٹتے ہیں۔",["repentance","forgiveness","mercy"],["sin","seek forgiveness","replace","forgive","tawbah","repent","human nature","mistakes","instighfar"]],["Jami Tirmidhi","سنن الترمذي","2499","Hasan","Abdullah ibn Mas'ud (RA)","النَّدَمُ تَوْبَةٌ","پچھتاوا ہی توبہ ہے۔","Regret is repentance.","سچے دل سے پچھتانا خود توبہ ہے۔ جب دل میں کوئی غلطی پر ندامت آئے تو سمجھ لیں کہ اللہ نے آپ کے دل کو ہلایا ہے — یہ رحمت کی علامت ہے۔",["repentance","guilt"],["regret","repentance","tawbah","guilt","remorse","sorry","feeling bad","sincere"]],["Sahih Bukhari","صحيح البخاري","5678","Sahih","Abu Hurairah (RA)","مَا أَنْزَلَ اللَّهُ دَاءً إِلَّا أَنْزَلَ لَهُ شِفَاءً","اللہ نے کوئی بیماری نہیں اتاری مگر اس کی دوا بھی اتاری ہے۔","Allah has not sent down any disease except that He has sent down a cure for it.","ہر بیماری کا علاج موجود ہے — چاہے ہم نے ابھی دریافت نہ کیا ہو۔ یہ حدیث طب پر تحقیق کی ترغیب دیتی ہے اور مریض کو یقین دلاتی ہے کہ شفا موجود ہے۔",["health","illness","healing"],["disease","cure","illness","healing","shifa","allah sent","every illness","medical","treatment"]],["Jami Tirmidhi","سنن الترمذي","2517","Hasan","Umar ibn Al-Khattab (RA)","لَوْ أَنَّكُمْ تَوَكَّلْتُمْ عَلَى اللَّهِ حَقَّ تَوَكُّلِهِ لَرَزَقَكُمْ كَمَا يَرْزُقُ الطَّيْرَ تَغْدُو خِمَاصًا وَتَرُوحُ بِطَانًا","اگر تم اللہ پر سچا توکل کرو تو وہ تمہیں ایسے رزق دے جیسے پرندوں کو دیتا ہے — صبح بھوکے نکلتے ہیں اور شام کو پیٹ بھر کر لوٹتے ہیں۔","If you relied on Allah with true reliance, He would provide for you as He provides for the birds: they go out hungry and return full.","پرندے گودام نہیں بناتے لیکن بھوکے نہیں رہتے۔ سچا توکل کوشش چھوڑنے کا نام نہیں — بلکہ کوشش کرکے نتیجہ اللہ پر چھوڑ دینے کا نام ہے۔",["trust","rizq","reliance","tawakkul"],["trust","tawakkul","birds","provision","hungry","full","rely on allah","true reliance","sustenance","rizq"]],["Sahih Bukhari","صحيح البخاري","6944","Sahih","Ibn Abbas (RA)","احْفَظِ اللَّهَ يَحْفَظْكَ احْفَظِ اللَّهَ تَجِدْهُ تُجَاهَكَ","اللہ کے احکام کی حفاظت کرو، اللہ تمہاری حفاظت کرے گا۔ اللہ کے احکام کی حفاظت کرو، تم اللہ کو اپنے سامنے پاؤ گے۔","Guard Allah's commandments and He will guard you. Guard Allah's commandments and you will find Him before you.","یہ حدیث نبی ﷺ نے ابن عباسؓ کو وصیت کرتے ہوئے فرمائی۔ اللہ کے حقوق کی حفاظت کرو — نماز، حلال، حرام — تو اللہ تمہارے ہر معاملے میں حفاظت فرمائے گا۔",["trust","faith","protection"],["guard","commandments","protect","find allah","before you","rights of allah","preserve","commandment"]],["Sahih Bukhari","صحيح البخاري","5090","Sahih","Abu Hurairah (RA)","خَيْرُكُمْ خَيْرُكُمْ لِأَهْلِهِ وَأَنَا خَيْرُكُمْ لِأَهْلِي","تم میں سے بہترین وہ ہے جو اپنے گھر والوں کے ساتھ بہترین ہو — اور میں تم سب میں اپنے گھر والوں کے ساتھ بہترین ہوں۔","The best of you is the one who is best to his family, and I am the best of you to my family.","بیرون میں اچھا دکھنا آسان ہے — اصل امتحان گھر میں ہے۔ نبی ﷺ نے اپنے آپ کو مثال بنایا کہ گھر والوں کے ساتھ عمدہ برتاؤ کرنا سب سے بڑی اچھائی ہے۔",["marriage","family","good character"],["best","family","wife","spouse","husband","character","kind","marriage","ahli"]],["Sahih Bukhari","صحيح البخاري","6416","Sahih","Ibn Umar (RA)","كُنْ فِي الدُّنْيَا كَأَنَّكَ غَرِيبٌ أَوْ عَابِرُ سَبِيلٍ","دنیا میں ایسے رہو جیسے تم مسافر ہو یا راہ چلتے ہو۔","Be in this world as if you were a stranger or a traveler passing through.","دنیا منزل نہیں، راستہ ہے۔ مسافر اپنے سامان کو ہلکا رکھتا ہے، منزل پر نظر رکھتا ہے۔ دنیا کی محبت میں ڈوبنا وہی غلطی ہے جیسے مسافر راستے میں گھر بنانے لگے۔",["death","afterlife","worldly","detachment"],["stranger","traveler","world","passing through","dunia","detach","temporary","not permanent","afterlife focus"]],["Jami Tirmidhi","سنن الترمذي","2460","Hasan","Abu Hurairah (RA)","أَكْثِرُوا ذِكْرَ هَاذِمِ اللَّذَّاتِ الْمَوْتِ","لذتوں کو توڑ دینے والی چیز — موت — کو کثرت سے یاد کرو۔","Remember often the destroyer of pleasures: death.","موت کی یاد غفلت کا علاج ہے۔ جو موت کو یاد رکھتا ہے وہ گناہوں سے دور رہتا ہے، آخرت کی تیاری کرتا ہے اور دنیا کے دھوکے میں نہیں آتا۔",["death","remembrance","afterlife"],["death","remember","destroyer","pleasures","reminder","mortality","often","think about death"]],["Sahih Bukhari","صحيح البخاري","5032","Sahih","Abu Hurairah (RA)","لَا حَسَدَ إِلَّا فِي اثْنَتَيْنِ رَجُلٌ آتَاهُ اللَّهُ مَالًا فَسُلِّطَ عَلَى هَلَكَتِهِ فِي الْحَقِّ وَرَجُلٌ آتَاهُ اللَّهُ حِكْمَةً فَهُوَ يَقْضِي بِهَا وَيُعَلِّمُهَا","حسد صرف دو چیزوں میں جائز ہے: وہ شخص جسے اللہ نے مال دیا اور وہ اسے حق میں خرچ کرتا ہے — اور وہ شخص جسے اللہ نے حکمت دی اور وہ اس کے مطابق فیصلہ کرتا اور سکھاتا ہے۔","Envy is not permitted except in two cases: a man given wealth by Allah who spends it righteously, and a man given wisdom by Allah who acts on it and teaches it.","اسلام میں عام حسد حرام ہے لیکن کسی کی نیکی دیکھ کر خود بھی ویسا بننے کی خواہش جائز ہے۔ اس کو 'غبطہ' کہتے ہیں — یہ مثبت رقابت ہے۔",["jealousy","wealth","knowledge"],["envy","hasad","permitted","two","wealth","wisdom","righteous","spend","jealousy allowed","envy permitted"]],["Sunan Abu Dawud","سنن أبي داود","4903","Sahih","Abu Hurairah (RA)","إِيَّاكُمْ وَالْحَسَدَ فَإِنَّ الْحَسَدَ يَأْكُلُ الْحَسَنَاتِ كَمَا تَأْكُلُ النَّارُ الْحَطَبَ","حسد سے بچو کیونکہ حسد نیکیوں کو ایسے کھا جاتا ہے جیسے آگ لکڑی کو کھاتی ہے۔","Beware of envy, for envy devours good deeds just as fire devours wood.","حسد صرف دوسروں کو نہیں جلاتا — پہلے خود حاسد کو جلاتا ہے۔ اس کی نیکیاں ختم ہو جاتی ہیں، دل مریض ہو جاتا ہے۔ اللہ کی تقسیم پر راضی رہنا ہی علاج ہے۔",["jealousy","character","warning"],["beware","envy","hasad","devours","good deeds","fire","wood","destroys","jealousy warning","eats deeds"]]]
+
+// ── EMOTION → TOPIC MAPPING ────────────────────────────────────────────
+var EMOTION_TOPICS = {
+  "sad":             ["sadness","grief","hardship","hope","patience"],
+  "anxious":         ["anxiety","worry","trust","peace","reliance"],
+  "grateful":        ["gratitude","blessings","contentment"],
+  "lost":            ["guidance","seeking guidance","knowledge","faith"],
+  "hopeful":         ["hope","ease","trust","patience"],
+  "afraid":          ["fear","trust","courage","reliance"],
+  "peaceful":        ["peaceful","peace","dhikr","contentment"],
+  "angry":           ["anger","forgiveness","self-control"],
+  "heartbroken":     ["heartbroken","loss","grief","hope","sadness"],
+  "seeking guidance":["seeking guidance","guidance","knowledge","faith"]
+};
+
+// ── SMART SEARCH ENGINE ────────────────────────────────────────────────
+function scoreAyat(a, query, emotion) {
+  var score = 0;
+  var q = (query||"").toLowerCase().trim();
+  var words = q ? q.split(/\s+/).filter(function(w){return w.length>2}) : [];
+  var en = (a[4]||"").toLowerCase();
+  var topics = a[5] || [];
+  var keywords = a[6] || [];
+
+  // Emotion topic match — strongest signal
+  if (emotion && EMOTION_TOPICS[emotion]) {
+    EMOTION_TOPICS[emotion].forEach(function(t) {
+      if (topics.indexOf(t) !== -1) score += 20;
+    });
+  }
+
+  // Keyword matches in the keywords array
+  words.forEach(function(w) {
+    keywords.forEach(function(k) {
+      if (k.toLowerCase().indexOf(w) !== -1 || w.indexOf(k.toLowerCase()) !== -1) score += 10;
+    });
+    // Direct English text match
+    if (en.indexOf(w) !== -1) score += 7;
+    // Topic match
+    topics.forEach(function(t) {
+      if (t.indexOf(w) !== -1 || w.indexOf(t) !== -1) score += 8;
+    });
+  });
+
+  // Phrase match bonus
+  if (q && en.indexOf(q) !== -1) score += 25;
+
+  return score;
+}
+
+function scoreHadith(h, query, emotion) {
+  var score = 0;
+  var q = (query||"").toLowerCase().trim();
+  var words = q ? q.split(/\s+/).filter(function(w){return w.length>2}) : [];
+  // New format: [book, book_ar, num, grade, narrator, arabic, urdu, english, explanation, topics[], keywords[]]
+  var en = (h[7]||"").toLowerCase();
+  var topics = h[9] || [];
+  var keywords = h[10] || [];
+
+  if (emotion && EMOTION_TOPICS[emotion]) {
+    EMOTION_TOPICS[emotion].forEach(function(t) {
+      if (topics.indexOf(t) !== -1) score += 20;
+    });
+  }
+
+  words.forEach(function(w) {
+    keywords.forEach(function(k) {
+      if (k.toLowerCase().indexOf(w) !== -1 || w.indexOf(k.toLowerCase()) !== -1) score += 10;
+    });
+    if (en.indexOf(w) !== -1) score += 7;
+    topics.forEach(function(t) {
+      if (t.indexOf(w) !== -1 || w.indexOf(t) !== -1) score += 8;
+    });
+  });
+
+  if (q && en.indexOf(q) !== -1) score += 25;
+  return score;
+}
+
+function searchAyat(query, emotion) {
+  if (!query && !emotion) return [];
+  var scored = AYAT.map(function(a) {
+    return { a:a, score:scoreAyat(a, query, emotion) };
+  }).filter(function(x){ return x.score > 0; });
+  scored.sort(function(a,b){ return b.score - a.score; });
+  // Deduplicate by surah:ayah and return top 5
+  var seen = {}, results = [];
+  scored.forEach(function(x) {
+    var key = x.a[0]+":"+x.a[1];
+    if (!seen[key] && results.length < 5) { seen[key]=1; results.push(x.a); }
+  });
+  return results;
+}
+
+function searchHadithDB(query, emotion) {
+  if (!query && !emotion) return [];
+  var scored = HADITH_DB.map(function(h) {
+    return { h:h, score:scoreHadith(h, query, emotion) };
+  }).filter(function(x){ return x.score > 0; });
+  scored.sort(function(a,b){ return b.score - a.score; });
+  return scored.slice(0,4).map(function(x){ return x.h; });
+}
+
+// ── STATIC DATA ────────────────────────────────────────────────────────
+var EMOTIONS = [
+  {e:"😢",l:"Sad",k:"sad"},{e:"😰",l:"Anxious",k:"anxious"},
+  {e:"🤲",l:"Grateful",k:"grateful"},{e:"🌫️",l:"Lost",k:"lost"},
+  {e:"🌅",l:"Hopeful",k:"hopeful"},{e:"😟",l:"Afraid",k:"afraid"},
+  {e:"☮️",l:"Peaceful",k:"peaceful"},{e:"😠",l:"Angry",k:"angry"},
+  {e:"💔",l:"Heartbroken",k:"heartbroken"},{e:"🔍",l:"Guidance",k:"seeking guidance"}
+];
+
+var TABS = [
+  {id:"home",icon:"🏠",label:"Home"},{id:"hadith",icon:"📜",label:"Hadith"},
+  {id:"names",icon:"✨",label:"Names"},{id:"prayer",icon:"🕌",label:"Prayer"},
+  {id:"dhikr",icon:"📿",label:"Dhikr"},{id:"bookmarks",icon:"🔖",label:"Saved"}
+];
+
+var OB_SLIDES = [
+  {icon:"🌙",title:"Welcome to Noor",ar:"مرحباً بك في نور",desc:"Your complete Islamic companion — with a built-in Quran and Hadith database. Search, reflect, and find guidance anytime, anywhere."},
+  {icon:"💭",title:"Search by Emotion",ar:"البحث بالمشاعر",desc:"Feeling sad, anxious, or lost? Select your emotion and Noor instantly finds the most comforting Ayat from the Holy Quran for your situation."},
+  {icon:"📜",title:"Authentic Hadith",ar:"الأحاديث الصحيحة",desc:"Search authentic Hadith from Bukhari, Muslim, Tirmidhi and more. Every result includes Arabic, Urdu, English and a scholarly explanation."},
+  {icon:"🕌",title:"Complete Islamic App",ar:"تطبيق إسلامي متكامل",desc:"Prayer times for any city, Dhikr counter, 99 Names of Allah, bookmarks, and a daily Ayat. Install to your home screen — works 100% offline!"},
+];
+
+var NAMES = [
+  {n:1,ar:"الرَّحْمَنُ",tr:"Ar-Rahman",en:"The Most Gracious",b:"Recite 100x after Fajr for mercy in all affairs."},
+  {n:2,ar:"الرَّحِيمُ",tr:"Ar-Raheem",en:"The Most Merciful",b:"Recite for forgiveness and Allah's endless mercy."},
+  {n:3,ar:"الْمَلِكُ",tr:"Al-Malik",en:"The King",b:"Recite 100x after Fajr for dignity and authority."},
+  {n:4,ar:"الْقُدُّوسُ",tr:"Al-Quddus",en:"The Most Holy",b:"Recite to purify the heart from sins."},
+  {n:5,ar:"السَّلاَمُ",tr:"As-Salam",en:"The Source of Peace",b:"Recite for peace, safety and healing."},
+  {n:6,ar:"الْمُؤْمِنُ",tr:"Al-Mumin",en:"The Guardian of Faith",b:"Recite 631x for protection from fear."},
+  {n:7,ar:"الْعَزِيزُ",tr:"Al-Aziz",en:"The Almighty",b:"Recite for strength and dignity."},
+  {n:8,ar:"الْجَبَّارُ",tr:"Al-Jabbar",en:"The Compeller",b:"Recite to mend what is broken in your life."},
+  {n:9,ar:"الْخَالِقُ",tr:"Al-Khaliq",en:"The Creator",b:"Recite when seeking new beginnings."},
+  {n:10,ar:"الْغَفَّارُ",tr:"Al-Ghaffar",en:"The Forgiving",b:"Recite abundantly between prayers."},
+  {n:11,ar:"الرَّزَّاقُ",tr:"Ar-Razzaq",en:"The Provider",b:"Recite for increase in sustenance."},
+  {n:12,ar:"الْفَتَّاحُ",tr:"Al-Fattah",en:"The Opener",b:"Recite when doors seem closed."},
+  {n:13,ar:"اَلْعَلِيمُ",tr:"Al-Alim",en:"The All-Knowing",b:"Recite for knowledge and clarity."},
+  {n:14,ar:"اللَّطِيفُ",tr:"Al-Latif",en:"The Subtle One",b:"Recite 133x for hidden blessings."},
+  {n:15,ar:"الْحَكِيمُ",tr:"Al-Hakim",en:"The Wise",b:"Recite for wisdom in decisions."},
+  {n:16,ar:"الْوَدُودُ",tr:"Al-Wadud",en:"The Loving",b:"Recite for love and reconciliation."},
+  {n:17,ar:"الشَّكُورُ",tr:"Ash-Shakur",en:"The Appreciative",b:"Recite to multiply blessings through gratitude."},
+  {n:18,ar:"الصَّمَدُ",tr:"As-Samad",en:"The Eternal Refuge",b:"Recite when only Allah can help."},
+  {n:19,ar:"النُّورُ",tr:"An-Nur",en:"The Light",b:"Recite for enlightenment of the heart."},
+  {n:20,ar:"الْهَادِي",tr:"Al-Hadi",en:"The Guide",b:"Recite when lost and needing direction."},
+  {n:21,ar:"التَّوَّابُ",tr:"At-Tawwab",en:"The Acceptor of Repentance",b:"Recite abundantly during tawbah."},
+  {n:22,ar:"العَفُوُّ",tr:"Al-Afuww",en:"The Pardoner",b:"Recite in the last third of the night."},
+  {n:23,ar:"الْحَيُّ",tr:"Al-Hayy",en:"The Ever-Living",b:"Recite for life, energy and health."},
+  {n:24,ar:"الْقَيُّومُ",tr:"Al-Qayyum",en:"The Self-Sustaining",b:"Recite with Al-Hayy for complete reliance."},
+  {n:25,ar:"الْغَنِيُّ",tr:"Al-Ghani",en:"The Self-Sufficient",b:"Recite to remove dependency on others."},
+  {n:26,ar:"الصَّبُورُ",tr:"As-Sabur",en:"The Patient",b:"Recite for patience during hardship."},
+  {n:27,ar:"الْمُجِيبُ",tr:"Al-Mujib",en:"The Responsive",b:"Recite when making dua."},
+  {n:28,ar:"الْوَاسِعُ",tr:"Al-Wasi",en:"The All-Encompassing",b:"Recite — Allah's mercy is boundless."},
+  {n:29,ar:"الْكَرِيمُ",tr:"Al-Karim",en:"The Most Generous",b:"Recite for generosity and noble character."},
+  {n:30,ar:"الرَّقِيبُ",tr:"Ar-Raqib",en:"The Ever-Watchful",b:"Recite to feel Allah is always present."},
+];
+
+var DHIKR = [
+  {ar:"سُبْحَانَ اللَّهِ",tr:"SubhanAllah",meaning:"Glory be to Allah",count:33,reward:"Plants a tree in Jannah"},
+  {ar:"الْحَمْدُ لِلَّهِ",tr:"Alhamdulillah",meaning:"All praise be to Allah",count:33,reward:"Fills the scales of good deeds"},
+  {ar:"اللَّهُ أَكْبَرُ",tr:"Allahu Akbar",meaning:"Allah is the Greatest",count:33,reward:"Most beloved words to Allah"},
+  {ar:"لَا إِلَهَ إِلَّا اللَّهُ",tr:"La ilaha illallah",meaning:"No god but Allah",count:100,reward:"Best of all dhikr"},
+  {ar:"أَسْتَغْفِرُ اللَّهَ",tr:"Astaghfirullah",meaning:"I seek forgiveness",count:100,reward:"Opens the doors of mercy"},
+  {ar:"لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",tr:"La hawla wala quwwata",meaning:"No power except with Allah",count:100,reward:"A treasure from Jannah"},
+];
+
+// ── STATE ──────────────────────────────────────────────────────────────
+var S = {
+  tab:"home",obStep:0,
+  home:{query:"",emotion:"",results:null,searched:false},
+  hadith:{query:"",results:null,searched:false},
+  names:{search:"",selected:null},
+  prayer:{input:"",loading:false,times:null,city:"",error:"",now:new Date()},
+  dhikr:{idx:0,count:0,sessions:JSON.parse(localStorage.getItem("noor_dhikr")||"{}")},
+};
+
+var BM = {
+  all:function(){return JSON.parse(localStorage.getItem("noor_bm")||"[]")},
+  has:function(s,a){return BM.all().some(function(b){return b.s===s&&b.a===a})},
+  add:function(x){var l=BM.all();if(!BM.has(x.s,x.a)){l.unshift(Object.assign({},x,{ts:Date.now()}));localStorage.setItem("noor_bm",JSON.stringify(l));}},
+  rem:function(s,a){localStorage.setItem("noor_bm",JSON.stringify(BM.all().filter(function(b){return!(b.s===s&&b.a===a)})))},
+};
+
+// ── RENDER HELPERS ─────────────────────────────────────────────────────
+function ayatCard(a) {
+  // a can be array [s,a,ar,ur,en,...] or object {s,a,ar,ur,en}
+  var s,ay,arabic,urdu,english,sn,sa;
+  if (Array.isArray(a)) {
+    s=a[0];ay=a[1];arabic=a[2];urdu=a[3];english=a[4];sn="";sa="";
+  } else {
+    s=a.s;ay=a.a;arabic=a.ar||"";urdu=a.ur||"";english=a.en||"";sn=a.sn||"";sa=a.sa||"";
+  }
+  var bm = BM.has(s,ay);
+  var obj = {s:s,a:ay,ar:arabic,ur:urdu,en:english,sn:sn,sa:sa};
+  var safeObj = JSON.stringify(obj).replace(/\\/g,"\\\\").replace(/"/g,"&quot;");
+  return '<div class="acard">'+
+    '<div class="a-meta">'+
+      '<div class="a-ref">'+
+        (sa?'<span style="font-family:Amiri,serif;font-size:.95rem">'+sa+'</span> · ':'') +
+        'Surah '+s+' : Ayah '+ay+
+      '</div>'+
+      '<div class="a-btns">'+
+        '<button class="abtn" onclick="playAudio('+s+','+ay+',this)">▶ Play</button>'+
+        '<button class="abtn'+(bm?' on':'')+'" id="bm_'+s+'_'+ay+'" onclick="toggleBM('+s+','+ay+')">'+
+          (bm?'🔖 Saved':'🔖 Save')+
+        '</button>'+
+      '</div>'+
+    '</div>'+
+    (arabic?'<div class="a-ar">'+arabic+'</div>':'') +
+    '<div class="a-tr">'+
+      (urdu?'<div class="tr-row"><div class="lb">UR</div><div style="flex:1"><div class="lbl">اردو</div><div class="ar-t">'+urdu+'</div></div></div>':'')+
+      '<div class="tr-row"><div class="lb">EN</div><div style="flex:1"><div class="lbl">English</div><div class="en-t">'+english+'</div></div></div>'+
+    '</div>'+
+  '</div>';
+}
+
+function hadithCard(h) {
+  // New format: [book, book_ar, num, grade, narrator, arabic, urdu, english, explanation, topics[], keywords[]]
+  var book=h[0],bookAr=h[1],num=h[2],grade=h[3],narrator=h[4],arabic=h[5],urdu=h[6],english=h[7],exp=h[8]||'';
+  return '<div class="hcard">'+
+
+    // ── NARRATOR / SOURCE HEADER ────────────────────────────────
+    '<div style="padding:14px 15px;border-bottom:1px solid var(--border);background:rgba(201,168,76,.07)">'+
+      // Book + Number
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px">'+
+        '<div>'+
+          (bookAr?'<div style="font-family:Amiri,serif;font-size:1.1rem;color:#e8c97a;margin-bottom:2px">'+bookAr+'</div>':'')+
+          '<div style="font-size:.78rem;color:rgba(201,168,76,.7);font-weight:600">'+
+            (book||'')+(num?' — Hadith #'+num:'')+
+          '</div>'+
+        '</div>'+
+        '<span class="gbadge" style="flex-shrink:0;margin-top:2px">'+grade+'</span>'+
+      '</div>'+
+      // Narrator on its own line — spacious
+      (narrator?
+        '<div style="display:flex;align-items:center;gap:8px;background:rgba(201,168,76,.08);border:1px solid var(--border2);border-radius:8px;padding:8px 11px">'+
+          '<span style="font-size:.85rem">🧕</span>'+
+          '<div>'+
+            '<div style="font-size:.53rem;text-transform:uppercase;letter-spacing:2px;color:rgba(201,168,76,.4);margin-bottom:1px">Narrator</div>'+
+            '<div style="font-size:.84rem;color:rgba(201,168,76,.85);font-weight:500">'+narrator+'</div>'+
+          '</div>'+
+        '</div>'
+      :'')+
+    '</div>'+
+
+    // ── ARABIC TEXT — bright & large ───────────────────────────
+    (arabic?
+      '<div style="font-family:Amiri,serif;font-size:1.75rem;line-height:2.1;text-align:right;direction:rtl;'+
+        'padding:18px 16px;border-bottom:1px solid var(--border);'+
+        'color:rgba(253,246,227,0.92);background:rgba(201,168,76,.04)">'+
+        arabic+
+      '</div>'
+    :'')+
+
+    // ── TRANSLATIONS ────────────────────────────────────────────
+    '<div style="padding:14px 15px;display:grid;gap:13px;border-bottom:1px solid var(--border2)">'+
+      // Urdu
+      (urdu?
+        '<div style="display:flex;gap:10px;align-items:flex-start">'+
+          '<div style="min-width:30px;height:30px;background:var(--gs);border:1px solid var(--border);border-radius:7px;'+
+            'display:flex;align-items:center;justify-content:center;font-size:.56rem;font-weight:800;color:var(--gold);flex-shrink:0">UR</div>'+
+          '<div style="flex:1">'+
+            '<div style="font-size:.53rem;text-transform:uppercase;letter-spacing:2px;color:rgba(201,168,76,.35);margin-bottom:4px">اردو ترجمہ</div>'+
+            '<div style="font-family:Amiri,serif;direction:rtl;text-align:right;font-size:1.05rem;line-height:2;color:rgba(253,246,227,0.82)">'+urdu+'</div>'+
+          '</div>'+
+        '</div>'
+      :'')+
+      // English
+      '<div style="display:flex;gap:10px;align-items:flex-start">'+
+        '<div style="min-width:30px;height:30px;background:var(--gs);border:1px solid var(--border);border-radius:7px;'+
+          'display:flex;align-items:center;justify-content:center;font-size:.56rem;font-weight:800;color:var(--gold);flex-shrink:0">EN</div>'+
+        '<div style="flex:1">'+
+          '<div style="font-size:.53rem;text-transform:uppercase;letter-spacing:2px;color:rgba(201,168,76,.35);margin-bottom:4px">English</div>'+
+          '<div style="font-size:.9rem;line-height:1.78;color:rgba(253,246,227,0.82)">'+english+'</div>'+
+        '</div>'+
+      '</div>'+
+    '</div>'+
+
+    // ── EXPLANATION ─────────────────────────────────────────────
+    (exp?
+      '<div style="padding:13px 15px;background:rgba(8,24,24,.6)">'+
+        '<div style="font-size:.56rem;text-transform:uppercase;letter-spacing:2.5px;color:var(--gold);font-weight:700;margin-bottom:8px">💡 Explanation</div>'+
+        '<div style="font-size:.87rem;line-height:1.82;color:rgba(253,246,227,0.72)">'+exp+'</div>'+
+      '</div>'
+    :'')+
+
+  '</div>';
+}
+
+// ── TAB RENDERS ────────────────────────────────────────────────────────
+function renderHome() {
+  var h = S.home;
+  var html = '<div class="card">' +
+    '<div class="sl" style="margin-bottom:12px">🔍 Search by Emotion or Keyword</div>' +
+    '<div class="egrid">' + EMOTIONS.map(function(e){
+      return '<button class="ebtn'+(h.emotion===e.k?' on':'')+'" onclick="setEmotion(\''+ e.k +'\')">'+ e.e +' '+ e.l +'</button>';
+    }).join('') + '</div>' +
+    '<textarea id="si" rows="2" placeholder="Describe what you are going through…&#10;e.g. I feel sad and alone, or exam stress, or missing someone" style="resize:none"></textarea>' +
+    '<button class="sbtn" onclick="doSearch()">🔍 Find Quran Guidance</button>' +
+  '</div>';
+
+  if (h.searched && h.results && h.results.length > 0) {
+    html += '<div class="res-tag"><div class="res-dot"></div><span>Found '+h.results.length+' Ayat from built-in Quran database — instant, no internet needed</span></div>';
+    html += h.results.map(ayatCard).join('');
+  } else if (h.searched && (!h.results || h.results.length === 0)) {
+    html += '<div class="card" style="text-align:center;padding:30px 16px">'+
+      '<div style="font-size:2rem;margin-bottom:10px">🔍</div>'+
+      '<div style="color:var(--text2)">No results found. Try different words or select an emotion above.</div>'+
+    '</div>';
+  } else {
+    html += '<div class="empty">'+
+      '<div style="font-size:3.5rem;margin-bottom:13px">📖</div>'+
+      '<div style="font-size:.93rem">Select how you feel or describe your situation above</div>'+
+      '<div style="font-size:.76rem;color:var(--text3);margin-top:8px">Instant results from built-in database · No internet · No errors · Always works</div>'+
+      '<div style="font-family:Amiri,serif;font-size:1.5rem;color:rgba(201,168,76,.18);margin-top:14px">اِقْرَأْ بِاسْمِ رَبِّكَ</div>'+
+    '</div>';
+  }
+  return html;
+}
+
+function renderHadith() {
+  var h = S.hadith;
+  var topics = ["patience","prayer","kindness","anger","honesty","parents","charity","knowledge","forgiveness","brotherhood","gratitude","guidance","repentance","trust in Allah","hardship","death","marriage","health","dua","jealousy"];
+  return '<div class="card">' +
+    '<div class="sl" style="margin-bottom:12px">📜 Search Authentic Hadith</div>' +
+    '<div style="font-size:.72rem;color:var(--text3);margin-bottom:11px">Bukhari · Muslim · Tirmidhi · Abu Dawud · Ibn Majah</div>' +
+    '<div style="display:flex;gap:8px">' +
+      '<input type="text" id="hi" placeholder="Search any topic — e.g. patience, parents, prayer…">' +
+      '<button onclick="doHadith()" style="background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:11px;padding:10px 14px;color:#1a1208;font-weight:700;font-size:.85rem;white-space:nowrap">🔍</button>' +
+    '</div>' +
+    '<div class="topics">' + topics.map(function(t){
+      return '<button class="tpill" onclick="quickH(\''+ t +'\')">'+ t +'</button>';
+    }).join('') + '</div>' +
+  '</div>' +
+  (h.searched && h.results && h.results.length > 0 ?
+    '<div class="res-tag"><div class="res-dot"></div><span>Found '+h.results.length+' authentic Hadith — instant, built-in database</span></div>' +
+    h.results.map(hadithCard).join('')
+  : h.searched ?
+    '<div class="card" style="text-align:center;padding:25px"><div style="color:var(--text2)">No results. Try a different keyword or tap a topic above.</div></div>'
+  :
+    '<div class="empty"><div style="font-size:3rem;margin-bottom:11px">📜</div><div>Type a topic or tap a keyword above</div><div style="font-size:.76rem;color:var(--text3);margin-top:7px">Built-in database — instant results, always works</div></div>'
+  );
+}
+
+function renderNames() {
+  var n = S.names, q = n.search.toLowerCase();
+  var filtered = NAMES.filter(function(x){
+    return x.tr.toLowerCase().indexOf(q)!==-1 || x.en.toLowerCase().indexOf(q)!==-1 || x.ar.indexOf(n.search)!==-1;
+  });
+  return '<div class="card">' +
+    '<div class="sl" style="margin-bottom:12px">✨ 99 Names of Allah — الأسماء الحسنى</div>' +
+    '<input type="text" id="ns" placeholder="Search by name or meaning…">' +
+  '</div>' +
+  (n.selected ?
+    '<div class="n-detail">' +
+      '<div style="font-family:Amiri,serif;font-size:3.2rem;color:#e8c97a;margin-bottom:9px">'+n.selected.ar+'</div>'+
+      '<div style="font-size:1.25rem;color:#e8c97a;font-weight:700">'+n.selected.tr+'</div>'+
+      '<div style="font-size:.88rem;color:var(--text2);margin-top:4px">'+n.selected.en+'</div>'+
+      '<div style="font-size:.82rem;color:rgba(201,168,76,.75);margin-top:14px;font-style:italic;line-height:1.7">'+n.selected.b+'</div>'+
+      '<button onclick="S.names.selected=null;renderContent()" style="margin-top:12px;background:var(--gs);border:1px solid var(--border);border-radius:7px;padding:5px 15px;color:var(--gold);font-size:.78rem">✕ Close</button>'+
+    '</div>' : ''
+  ) +
+  '<div class="ngrid">' + filtered.map(function(x){
+    return '<div class="ncard" onclick="S.names.selected=NAMES.find(function(n){return n.n==='+ x.n +'});render()">'+
+      '<div style="font-size:.54rem;color:var(--text3);margin-bottom:2px">'+ x.n +'</div>'+
+      '<div style="font-family:Amiri,serif;font-size:1.35rem;color:#e8c97a;margin-bottom:3px">'+ x.ar +'</div>'+
+      '<div style="font-size:.63rem;color:var(--gold);font-weight:600">'+ x.tr +'</div>'+
+      '<div style="font-size:.57rem;color:var(--text3);margin-top:2px">'+ x.en +'</div>'+
+    '</div>';
+  }).join('') + '</div>';
+}
+
+function renderPrayer() {
+  var p=S.prayer, now=p.now;
+  var nm=now.getHours()*60+now.getMinutes();
+  var icons={Fajr:"🌄",Sunrise:"🌅",Dhuhr:"☀️",Asr:"🌤️",Maghrib:"🌇",Isha:"🌙"};
+  var next=null;
+  if(p.times){Object.keys(p.times).forEach(function(nm2){if(!next&&(function(){var x=p.times[nm2].split(":").map(Number);return x[0]*60+x[1]>nm;})())next=nm2;});if(!next)next="Fajr";}
+  return '<div class="card">' +
+    '<div class="sl" style="margin-bottom:12px">🕌 Prayer Times</div>' +
+    '<div style="font-size:2rem;font-weight:700;color:#e8c97a;text-align:center;letter-spacing:2px" id="clock">'+now.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",second:"2-digit"})+'</div>'+
+    '<div style="font-size:.73rem;color:var(--text3);text-align:center;margin-top:3px">'+now.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"})+'</div>'+
+    '<div style="display:flex;gap:8px;margin-top:14px">'+
+      '<input type="text" id="ci" placeholder="Enter city — e.g. Karachi, Lahore, Dubai">'+
+      '<button onclick="fetchPrayer()" style="background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:11px;padding:10px 12px;color:#1a1208;font-weight:700;font-size:.78rem;white-space:nowrap">'+(p.loading?"⏳":"Get Times")+'</button>'+
+    '</div>'+
+    (p.error?'<div style="color:rgba(255,180,180,.7);font-size:.78rem;margin-top:7px">⚠️ '+p.error+'</div>':'')+
+  '</div>'+
+  (p.times ?
+    '<div class="card">'+
+      '<div style="text-align:center;font-weight:600;color:#e8c97a;margin-bottom:12px">📍 '+p.city+'</div>'+
+      (next?'<div style="background:rgba(201,168,76,.1);border:1px solid var(--border);border-radius:11px;padding:11px;text-align:center;margin-bottom:12px"><div style="font-size:.56rem;text-transform:uppercase;letter-spacing:2px;color:rgba(201,168,76,.4);margin-bottom:3px">Next Prayer</div><div style="font-size:1.05rem;color:#e8c97a;font-weight:700">'+(icons[next]||"🕌")+' '+next+' — '+p.times[next]+'</div></div>':'')+
+      Object.keys(p.times).map(function(name){
+        var isN=next===name;
+        return '<div class="pr-row '+(isN?"pr-next":"pr-rest")+'"><div style="color:'+(isN?"#e8c97a":"var(--text2)")+'">'+(icons[name]||"🕌")+' '+name+'</div><div style="font-weight:700;color:'+(isN?"#e8c97a":"var(--text2)")+'">'+p.times[name]+'</div></div>';
+      }).join("")+
+    '</div>'
+  : '<div class="empty"><div style="font-size:3rem;margin-bottom:11px">🕌</div><div>Enter your city for prayer times</div></div>'
+  );
+}
+
+function renderDhikr() {
+  var d=S.dhikr, sel=DHIKR[d.idx];
+  var pct=Math.min(d.count/sel.count*100,100), r=62, circ=2*Math.PI*r;
+  var today=new Date().toDateString();
+  var todayStats=DHIKR.filter(function(dk){return (d.sessions[today+"_"+dk.tr]||0)>0});
+  return '<div class="card" style="margin-bottom:13px"><div class="sl" style="margin-bottom:11px">📿 Choose Dhikr</div>'+
+    DHIKR.map(function(dk,i){
+      return '<div class="ditem'+(d.idx===i?' on':'')+'" onclick="setDhikr('+i+')">'+
+        '<div><div style="font-family:Amiri,serif;font-size:1.05rem;color:'+(d.idx===i?"#e8c97a":"var(--text2)")+'">'+dk.ar+'</div>'+
+        '<div style="font-size:.68rem;color:rgba(201,168,76,.4);margin-top:2px">'+dk.tr+' · '+dk.meaning+'</div></div>'+
+        '<div style="font-size:.65rem;color:rgba(201,168,76,.3)">×'+dk.count+'</div></div>';
+    }).join("")+
+  '</div>'+
+  '<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;text-align:center">'+
+    '<div style="font-family:Amiri,serif;font-size:1.9rem;color:#e8c97a;margin-bottom:4px">'+sel.ar+'</div>'+
+    '<div style="font-size:.78rem;color:rgba(201,168,76,.5);margin-bottom:16px">'+sel.meaning+'</div>'+
+    '<div style="position:relative;width:148px;height:148px;margin:0 auto 15px">'+
+      '<svg width="148" height="148" style="transform:rotate(-90deg)">'+
+        '<circle cx="74" cy="74" r="'+r+'" fill="none" stroke="rgba(201,168,76,.12)" stroke-width="9"/>'+
+        '<circle cx="74" cy="74" r="'+r+'" fill="none" stroke="#c9a84c" stroke-width="9" stroke-linecap="round" stroke-dasharray="'+circ+'" stroke-dashoffset="'+( circ*(1-pct/100) )+'" style="transition:stroke-dashoffset .3s"/>'+
+      '</svg>'+
+      '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">'+
+        '<div style="font-size:2.7rem;font-weight:800;color:#e8c97a;line-height:1">'+d.count+'</div>'+
+        '<div style="font-size:.65rem;color:rgba(201,168,76,.4);margin-top:2px">of '+sel.count+'</div>'+
+      '</div>'+
+    '</div>'+
+    '<button class="dtap" onclick="tapDhikr()">📿</button>'+
+    '<div style="font-size:.75rem;color:rgba(201,168,76,.55);font-style:italic;margin-bottom:12px">'+sel.reward+'</div>'+
+    '<button onclick="S.dhikr.count=0;renderContent()" style="background:var(--card);border:1px solid var(--border);border-radius:7px;padding:5px 16px;color:var(--text3);font-size:.78rem">↺ Reset</button>'+
+    (todayStats.length ? '<div style="margin-top:15px;border-top:1px solid var(--border2);padding-top:12px"><div class="sl" style="margin-bottom:8px">Today</div><div style="display:flex;justify-content:center;gap:14px;flex-wrap:wrap">'+
+      todayStats.map(function(dk){var c=d.sessions[today+"_"+dk.tr]||0;return '<div style="text-align:center"><div style="font-size:.73rem;color:var(--gold);font-weight:700">'+c+'</div><div style="font-size:.57rem;color:var(--text3)">'+dk.tr+'</div></div>'}).join("")+
+    '</div></div>' : "")+
+  '</div>';
+}
+
+function renderBookmarks() {
+  var bm=BM.all();
+  if(!bm.length) return '<div class="empty"><div style="font-size:3.5rem;margin-bottom:12px">🔖</div><div>No saved Ayat yet</div><div style="font-size:.76rem;margin-top:7px;color:var(--text3)">Tap Save on any Ayat to keep it here</div></div>';
+  return '<div class="sl" style="margin-bottom:14px">🔖 Saved Ayat ('+bm.length+')</div>'+
+    bm.map(function(a){
+      return ayatCard(a)+
+        '<button onclick="BM.rem('+ a.s +','+ a.a +');renderContent()" style="display:block;margin:-7px auto 13px;background:rgba(180,50,50,.09);border:1px solid rgba(180,50,50,.2);border-radius:7px;padding:4px 12px;color:rgba(255,140,140,.6);font-size:.73rem">🗑 Remove</button>';
+    }).join('');
+}
+
+// ── RENDER ENGINE ──────────────────────────────────────────────────────
+function renderNav(){
+  document.getElementById("nav").innerHTML=TABS.map(function(t){
+    return '<button class="nb'+(S.tab===t.id?' active':'')+'" onclick="switchTab(\''+ t.id +'\')"><span class="nb-icon">'+ t.icon +'</span><span class="nb-label">'+ t.label +'</span><div class="nb-dot"></div></button>';
+  }).join('');
+}
+
+function renderContent(){
+  var el=document.getElementById("content"); if(!el) return;
+  switch(S.tab){
+    case"home":    el.innerHTML=renderHome();   bindHome();   break;
+    case"hadith":  el.innerHTML=renderHadith(); bindHadith(); break;
+    case"names":   el.innerHTML=renderNames();  bindNames();  break;
+    case"prayer":  el.innerHTML=renderPrayer(); bindPrayer(); break;
+    case"dhikr":   el.innerHTML=renderDhikr();                break;
+    case"bookmarks":el.innerHTML=renderBookmarks();           break;
+  }
+}
+
+function render(){ renderNav(); renderContent(); }
+
+// ── BINDINGS ───────────────────────────────────────────────────────────
+function bindHome(){
+  var si=document.getElementById("si"); if(!si) return;
+  si.value=S.home.query;
+  si.oninput=function(e){S.home.query=e.target.value;};
+  si.onkeydown=function(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();doSearch();}};
+}
+function bindHadith(){
+  var hi=document.getElementById("hi"); if(!hi) return;
+  hi.value=S.hadith.query;
+  hi.oninput=function(e){S.hadith.query=e.target.value;};
+  hi.onkeydown=function(e){if(e.key==="Enter")doHadith();};
+}
+function bindNames(){
+  var ns=document.getElementById("ns"); if(!ns) return;
+  ns.value=S.names.search;
+  ns.oninput=function(e){
+    S.names.search=e.target.value;
+    var c=ns.selectionStart; renderContent();
+    var n2=document.getElementById("ns"); if(n2){n2.focus();n2.setSelectionRange(c,c);}
+  };
+}
+function bindPrayer(){
+  var ci=document.getElementById("ci"); if(!ci) return;
+  ci.value=S.prayer.input;
+  ci.oninput=function(e){S.prayer.input=e.target.value;};
+  ci.onkeydown=function(e){if(e.key==="Enter")fetchPrayer();};
+}
+
+// ── ACTIONS ────────────────────────────────────────────────────────────
+function switchTab(t){S.tab=t;render();window.scrollTo(0,0);}
+function setEmotion(k){S.home.emotion=(S.home.emotion===k?"":k);renderContent();}
+function quickH(t){S.hadith.query=t;render();doHadith();}
+function setDhikr(i){S.dhikr.idx=i;S.dhikr.count=0;renderContent();}
+
+function doSearch(){
+  var q=S.home.query, em=S.home.emotion;
+  if(!q.trim()&&!em) return;
+  S.home.results=searchAyat(q,em);
+  S.home.searched=true;
+  renderContent();
+}
+
+function doHadith(){
+  var q=S.hadith.query;
+  if(!q.trim()) return;
+  // Map common words to emotion for better Hadith matching
+  var emCheck = null;
+  var qL=q.toLowerCase();
+  if(qL.match(/sad|grief|cry|weep|sorrow/)) emCheck="sad";
+  else if(qL.match(/anxious|worry|stress|fear|afraid/)) emCheck="anxious";
+  else if(qL.match(/angry|anger|rage|mad|furious/)) emCheck="angry";
+  else if(qL.match(/patient|patience|sabr|hardship/)) emCheck="hopeful";
+  S.hadith.results=searchHadithDB(q,emCheck);
+  S.hadith.searched=true;
+  renderContent();
+}
+
+function tapDhikr(){
+  var d=S.dhikr, sel=DHIKR[d.idx];
+  d.count++;
+  if(d.count===sel.count) setTimeout(function(){alert("MashaAllah! 🎉\n"+sel.count+"× "+sel.tr+" completed!\n\n"+sel.reward);},100);
+  var today=new Date().toDateString(), key=today+"_"+sel.tr;
+  d.sessions[key]=(d.sessions[key]||0)+1;
+  localStorage.setItem("noor_dhikr",JSON.stringify(d.sessions));
+  renderContent();
+}
+
+function toggleBM(s,a){
+  // Find ayat in current results or bookmarks
+  var found=null;
+  if(S.home.results) found=S.home.results.find(function(x){return Array.isArray(x)?x[0]===s&&x[1]===a:x.s===s&&x.a===a});
+  if(!found) found=BM.all().find(function(x){return x.s===s&&x.a===a});
+  var obj=found?(Array.isArray(found)?{s:found[0],a:found[1],ar:found[2],ur:found[3],en:found[4],sn:"",sa:""}:found):{s:s,a:a,ar:"",ur:"",en:"",sn:"",sa:""};
+  if(BM.has(s,a))BM.rem(s,a); else BM.add(obj);
+  render();
+}
+
+var curAudio=null;
+function playAudio(s,a,btn){
+  if(curAudio){curAudio.pause();curAudio=null;document.querySelectorAll(".abtn.playing").forEach(function(b){b.textContent="▶ Play";b.classList.remove("playing");});}
+  curAudio=new Audio("https://cdn.islamic.network/quran/audio/128/ar.alafasy/"+String(s).padStart(3,"0")+String(a).padStart(3,"0")+".mp3");
+  btn.textContent="⏹ Stop"; btn.classList.add("playing");
+  curAudio.onended=function(){btn.textContent="▶ Play";btn.classList.remove("playing");curAudio=null;};
+  curAudio.onerror=function(){btn.textContent="▶ Play";btn.classList.remove("playing");curAudio=null;alert("Audio not available offline. Connect to internet to play recitation.");};
+  curAudio.play().catch(function(){btn.textContent="▶ Play";});
+}
+
+function fetchPrayer(){
+  var p=S.prayer; if(!p.input.trim()) return;
+  p.loading=true; p.error=""; render();
+  var d=new Date();
+  fetch("https://api.aladhan.com/v1/timingsByCity?city="+encodeURIComponent(p.input)+"&country=PK&method=1&date="+d.getDate()+"-"+(d.getMonth()+1)+"-"+d.getFullYear())
+  .then(function(r){return r.json()})
+  .then(function(data){
+    if(data.code!==200)throw new Error("not found");
+    var t=data.data.timings;
+    p.times={Fajr:t.Fajr,Sunrise:t.Sunrise,Dhuhr:t.Dhuhr,Asr:t.Asr,Maghrib:t.Maghrib,Isha:t.Isha};
+    p.city=p.input; p.error="";
+  })
+  .catch(function(){p.error="City not found. Try: Karachi, Lahore, Islamabad, Dubai";})
+  .then(function(){p.loading=false; render();});
+}
+
+// ── DAILY AYAT ─────────────────────────────────────────────────────────
+var DAILY_POOL=[0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80];
+var dailyLoaded=false;
+function openDaily(){document.getElementById("daily-modal").style.display="flex";if(!dailyLoaded)loadDaily();}
+function closeDaily(){document.getElementById("daily-modal").style.display="none";}
+function loadDaily(){
+  dailyLoaded=true;
+  var idx=DAILY_POOL[new Date().getDate()%DAILY_POOL.length];
+  var a=AYAT[Math.min(idx,AYAT.length-1)];
+  document.getElementById("daily-content").innerHTML=a?ayatCard(a):"<div style='color:var(--text3);text-align:center;padding:20px'>No ayat available</div>";
+}
+
+// ── ONBOARDING ─────────────────────────────────────────────────────────
+function showOb(i){
+  var sl=OB_SLIDES[i];
+  document.getElementById("ob-icon").textContent=sl.icon;
+  document.getElementById("ob-title").textContent=sl.title;
+  document.getElementById("ob-ar").textContent=sl.ar;
+  document.getElementById("ob-desc").textContent=sl.desc;
+  document.getElementById("ob-dots").innerHTML=OB_SLIDES.map(function(_,j){
+    return '<div class="ob-dot' + (j===i?' active':'') +'" style="width:'+(j===i?26:7)+'px"></div>';
+  }).join('');
+  S.obStep=i;
+  var nb=document.getElementById("ob-next");
+  document.getElementById("ob-back").style.display=i>0?"inline-block":"none";
+  if(i<OB_SLIDES.length-1){nb.textContent="Next →";nb.onclick=function(){showOb(i+1);};}
+  else{nb.textContent="🌙 Begin Journey";nb.onclick=finishOb;}
+}
+function finishOb(){
+  localStorage.setItem("noor_onboarded","1");
+  document.getElementById("ob").style.display="none";
+  document.getElementById("app").classList.add("show");
+  render();
+}
+
+// ── SETTINGS ───────────────────────────────────────────────────────────
+function showSettings(){
+  var choice=prompt("⚙️ Noor Settings\n\n1 — See Intro Again\n2 — Clear All Data\n3 — Cancel\n\nType a number:");
+  if(choice==="1"){localStorage.removeItem("noor_onboarded");location.reload();}
+  else if(choice==="2"){if(confirm("Clear all saved Ayat and data?")){localStorage.clear();location.reload();}}
+}
+
+// ── CLOCK ───────────────────────────────────────────────────────────────
+setInterval(function(){
+  S.prayer.now=new Date();
+  if(S.tab==="prayer"){var cl=document.getElementById("clock");if(cl)cl.textContent=S.prayer.now.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",second:"2-digit"});}
+},1000);
+
+// ── PWA ────────────────────────────────────────────────────────────────
+var deferredPrompt=null;
+window.addEventListener("beforeinstallprompt",function(e){
+  e.preventDefault(); deferredPrompt=e;
+  if(!localStorage.getItem("noor_install_dismissed")) setTimeout(function(){document.getElementById("install-banner").classList.add("show");},5000);
+});
+window.addEventListener("appinstalled",function(){
+  document.getElementById("install-banner").classList.remove("show");
+  localStorage.setItem("noor_install_dismissed","1");
+});
+var isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+var isStandalone=("standalone" in navigator)&&navigator.standalone;
+var isSafari=/^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+if(isIOS&&isSafari&&!isStandalone&&!localStorage.getItem("noor_install_dismissed")){
+  setTimeout(function(){document.getElementById("ios-guide").classList.add("show");},5000);
+}
+
+// ── BOOT ────────────────────────────────────────────────────────────────
+window.addEventListener("load",function(){
+  document.getElementById("ob-back").onclick=function(){showOb(Math.max(0,S.obStep-1));};
+  document.getElementById("ob-skip").onclick=finishOb;
+  document.getElementById("settings-btn").onclick=showSettings;
+  document.getElementById("daily-btn").onclick=openDaily;
+  document.getElementById("daily-close").onclick=closeDaily;
+  document.getElementById("daily-modal").onclick=function(e){if(e.target===this)closeDaily();};
+  document.getElementById("ib-install").onclick=function(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(function(r){if(r.outcome==="accepted"){document.getElementById("install-banner").classList.remove("show");localStorage.setItem("noor_install_dismissed","1");}deferredPrompt=null;});}};
+  document.getElementById("ib-dismiss").onclick=function(){document.getElementById("install-banner").classList.remove("show");localStorage.setItem("noor_install_dismissed","1");};
+  document.getElementById("ib-later").onclick=function(){document.getElementById("install-banner").classList.remove("show");};
+  document.getElementById("ios-close").onclick=function(){document.getElementById("ios-guide").classList.remove("show");localStorage.setItem("noor_install_dismissed","1");};
+
+  if(localStorage.getItem("noor_onboarded")){
+    document.getElementById("ob").style.display="none";
+    document.getElementById("app").classList.add("show");
+    render();
+  } else {
+    showOb(0);
+  }
+});
+</script>
+</body>
+</html>
